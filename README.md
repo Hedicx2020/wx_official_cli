@@ -1,14 +1,18 @@
 # gh_ui_cli
 
-`gh_ui_cli` 是 `gh_quant_ui` 的命令行入口，目标是让桌面端现有功能能被本地 agent、脚本和 CI 直接调用。
+`gh_ui_cli` 是 `gh_quant_ui` 桌面端功能的命令行入口，面向本地 agent、脚本和 CI 调用。
+
+**微信模块已独立**：从 v0.2 起，`gh-ui wechat *` 全部子命令自带本地实现，
+**不再需要 gh_quant_ui 源码**也不需要运行中的 sidecar。其它模块（data / factor /
+backtest / ai / remote）仍保留 HTTP 与 source 双模式 wrapper，将在后续阶段逐步独立化。
 
 面向普通用户的安装、连接、常用命令和排障说明见 [USER_GUIDE.md](USER_GUIDE.md)。
 
 设计原则:
 
 - 默认输出 JSON，便于 agent 解析。
-- 直接加载 `gh_quant_ui/api/main.py` 的 FastAPI app，不重新实现业务逻辑。
-- 通用 `api request` 覆盖所有后端路由；常用数据、因子、回测、微信功能提供显式子命令。
+- 微信模块（41 个核心端点）走本地 `gh_ui_cli/wechat/` 实现，零外部进程依赖。
+- 其它模块通过 `api request` 通用入口或显式子命令转发到 FastAPI / HTTP。
 - 路径通过参数或环境变量覆盖，适配 macOS 和 Windows。
 
 ## 安装与运行
