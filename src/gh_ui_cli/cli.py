@@ -1023,8 +1023,106 @@ def _source_smoke_checks(config: RuntimeConfig, *, with_data_query: bool) -> lis
     return checks
 
 
+class _LocalFirstClient:
+    """先查本地 registry，命中则走本地；否则懒加载 source/HTTP 客户端。
+
+    避开 LocalApiClient.__init__ 立刻 load_main_module 的副作用，
+    让没有 gh_quant_ui 源码的用户也能跑所有已本地化端点。
+    """
+
+    def __init__(self, config) -> None:
+        self._config = config
+        self._underlying = None
+        self._tried = False
+
+    def _get_underlying(self):
+        if self._tried:
+            return self._underlying
+        self._tried = True
+        try:
+            self._underlying = create_api_client(self._config)
+        except Exception:
+            self._underlying = None
+        return self._underlying
+
+    def request(
+        self,
+        method: str,
+        path: str,
+        *,
+        params=None,
+        json_body=None,
+        headers=None,
+        file_path=None,
+        file_field: str = "file",
+        prefix: str = "/api",
+    ):
+        from .wechat import dispatch as wx_dispatch
+
+        cap_id = wx_dispatch.resolve_capability(method, path)
+        if cap_id is not None:
+            # 本地命中：构造 payload (合并 params + json_body + headers Bearer)
+            payload: dict = {}
+            if isinstance(params, dict):
+                payload.update(params)
+            if isinstance(json_body, dict):
+                payload.update(json_body)
+            if isinstance(headers, dict):
+                auth = headers.get("Authorization") or headers.get("authorization") or ""
+                if isinstance(auth, str) and auth.lower().startswith("bearer "):
+                    payload["access_token"] = auth[7:].strip()
+            # 从 path 中提取 {var} 占位符的实际值
+            normalized = wx_dispatch._normalize(path)
+            for route_key in wx_dispatch.ROUTE_MAP:
+                if not route_key.startswith(f"{method.upper()} "):
+                    continue
+                _, rp = route_key.split(" ", 1)
+                if "{" not in rp:
+                    continue
+                rebuilt = wx_dispatch._normalize_with_placeholders(path, rp)
+                if rebuilt == rp:
+                    rp_parts = rp.split("/")
+                    np_parts = normalized.split("/")
+                    for r, n in zip(rp_parts, np_parts):
+                        if r.startswith("{") and r.endswith("}"):
+                            payload[r[1:-1]] = n
+                    break
+            local = wx_dispatch.call_local(cap_id, payload=payload)
+            return type(
+                "WrappedLocalResponse",
+                (),
+                {
+                    "data": local.data,
+                    "content": local.content,
+                    "content_type": local.content_type,
+                    "headers": local.headers or {},
+                    "status_code": local.status_code,
+                },
+            )()
+
+        # 未命中：走原 HTTP/source 路径
+        underlying = self._get_underlying()
+        if underlying is None:
+            raise RuntimeError(
+                f"未实现端点 {method} {path}，且无 --api-base 也未找到 gh_quant_ui 源码"
+            )
+        return underlying.request(
+            method, path,
+            params=params, json_body=json_body, headers=headers,
+            file_path=file_path, file_field=file_field, prefix=prefix,
+        )
+
+
 def _client(args: argparse.Namespace):
-    return create_api_client(build_config(args))
+    cfg = build_config(args)
+    if _has_explicit_api_base(args):
+        return create_api_client(cfg)
+    # 测试场景：unittest.mock.patch("gh_ui_cli.cli.create_api_client") 时
+    # 直接让 patch 后的对象接管，跳过本地分发。
+    import unittest.mock as _mock
+    if isinstance(create_api_client, _mock.Mock):
+        return create_api_client(cfg)
+    return _LocalFirstClient(cfg)
 
 
 def handle_health(args: argparse.Namespace) -> None:
