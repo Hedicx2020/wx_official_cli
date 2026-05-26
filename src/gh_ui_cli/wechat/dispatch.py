@@ -68,6 +68,18 @@ ROUTE_MAP: dict[str, str] = {
     "GET /api/remote/tokens": "op:remote:tokens-list",
     "POST /api/remote/tokens": "op:remote:tokens-generate",
     "DELETE /api/remote/tokens/{token_id}": "op:remote:tokens-revoke",
+    # 系统 / 健康 / 配置 / 日志 / 反馈 / 导出
+    "GET /api/health": "op:system:health",
+    "GET /api/config/paths": "op:system:config-paths-get",
+    "POST /api/config/paths": "op:system:config-paths-set",
+    "GET /api/logs": "op:system:logs-get",
+    "POST /api/feedback": "op:system:feedback-submit",
+    "POST /api/export/excel": "op:system:export-excel",
+    # 认证（hedicxl.cn 代理）
+    "POST /api/auth/verify": "op:system:auth-verify",
+    "POST /api/auth/login": "op:system:auth-login",
+    "POST /api/auth/register": "op:system:auth-register",
+    "POST /api/auth/active-token": "op:system:auth-active-token",
 }
 
 

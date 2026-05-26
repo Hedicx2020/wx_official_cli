@@ -946,7 +946,7 @@ class CliParserTest(unittest.TestCase):
 
         cases = [
             (
-                ["remote", "me", "--access-token", "access"],
+                ["--api-base", "http://test", "remote", "me", "--access-token", "access"],
                 handle_remote_me,
                 {
                     "method": "GET",
@@ -955,7 +955,7 @@ class CliParserTest(unittest.TestCase):
                 },
             ),
             (
-                ["remote", "tokens", "--access-token", "access"],
+                ["--api-base", "http://test", "remote", "tokens", "--access-token", "access"],
                 handle_remote_tokens,
                 {
                     "method": "GET",
@@ -964,7 +964,7 @@ class CliParserTest(unittest.TestCase):
                 },
             ),
             (
-                ["remote", "token-generate", "--access-token", "access", "--name", "agent"],
+                ["--api-base", "http://test", "remote", "token-generate", "--access-token", "access", "--name", "agent"],
                 handle_remote_token_generate,
                 {
                     "method": "POST",
@@ -974,7 +974,7 @@ class CliParserTest(unittest.TestCase):
                 },
             ),
             (
-                ["remote", "token-revoke", "42", "--access-token", "access"],
+                ["--api-base", "http://test", "remote", "token-revoke", "42", "--access-token", "access"],
                 handle_remote_token_revoke,
                 {
                     "method": "DELETE",
@@ -1009,7 +1009,7 @@ class CliParserTest(unittest.TestCase):
             path = Path(tmpdir) / "profile.json"
             with patch.dict(os.environ, {"GH_UI_CLI_PROFILE": str(path)}, clear=True):
                 save_profile({"access_token": "profile-access"})
-                args = parser.parse_args(["remote", "me"])
+                args = parser.parse_args(["--api-base", "http://test", "remote", "me"])
 
                 with (
                     patch("gh_ui_cli.cli.create_api_client", return_value=client),
@@ -1343,7 +1343,8 @@ class CliParserTest(unittest.TestCase):
             redirect_stdout(StringIO()),
         ):
             for argv, _expected in cases:
-                args = parser.parse_args(argv)
+                # 强制走远端 mock client，避开本地 wechat capability 分发
+                args = parser.parse_args(["--api-base", "http://test", *argv])
                 args.func(args)
 
         self.assertEqual(len(client.calls), len(cases))

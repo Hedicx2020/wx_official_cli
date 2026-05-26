@@ -15,6 +15,7 @@ from typing import Any
 from urllib.parse import quote
 
 from . import remote as _remote_pkg  # noqa: F401  注册 op:remote:* capability
+from . import system as _system_pkg  # noqa: F401  注册 op:system:* capability
 from . import wechat as _wechat_pkg  # noqa: F401  注册 op:wechat:* capability
 from .api_client import ApiError, LocalApiClient, create_api_client
 from .coverage_audit import (
@@ -1285,8 +1286,11 @@ def _bearer_token(access_token: str) -> str:
     return f"Bearer {access_token}"
 
 
-def _local_response(method: str, api_path: str, payload: dict) -> Any | None:
-    """通用本地分发：远程/数据/因子/回测/AI 都走这个入口。"""
+def _local_response(method: str, api_path: str, payload: dict, args: argparse.Namespace | None = None) -> Any | None:
+    """通用本地分发：远程/数据/因子/回测/AI 都走这个入口。
+    用户显式指定 --api-base 时跳过本地分发。"""
+    if _has_explicit_api_base(args):
+        return None
     from .wechat import dispatch as wx_dispatch
 
     cap_id = wx_dispatch.resolve_capability(method, api_path)
@@ -1316,7 +1320,7 @@ def _resolve_access_token_value(args: argparse.Namespace) -> str | None:
 
 def handle_remote_me(args: argparse.Namespace) -> None:
     tok = _resolve_access_token_value(args)
-    local = _local_response("GET", "/api/remote/me", {"access_token": tok} if tok else {})
+    local = _local_response("GET", "/api/remote/me", {"access_token": tok} if tok else {}, args=args)
     if local is not None:
         emit_response(local, save=args.save)
         return
@@ -1325,7 +1329,7 @@ def handle_remote_me(args: argparse.Namespace) -> None:
 
 def handle_remote_tokens(args: argparse.Namespace) -> None:
     tok = _resolve_access_token_value(args)
-    local = _local_response("GET", "/api/remote/tokens", {"access_token": tok} if tok else {})
+    local = _local_response("GET", "/api/remote/tokens", {"access_token": tok} if tok else {}, args=args)
     if local is not None:
         emit_response(local, save=args.save)
         return
@@ -1341,9 +1345,10 @@ def handle_remote_token_generate(args: argparse.Namespace) -> None:
     else:
         body.setdefault("name", None)
     tok = _resolve_access_token_value(args)
+    local_payload = dict(body)
     if tok:
-        body["access_token"] = tok
-    local = _local_response("POST", "/api/remote/tokens", body)
+        local_payload["access_token"] = tok
+    local = _local_response("POST", "/api/remote/tokens", local_payload, args=args)
     if local is not None:
         emit_response(local, save=args.save)
         return
@@ -1359,6 +1364,7 @@ def handle_remote_token_revoke(args: argparse.Namespace) -> None:
         "DELETE",
         f"/api/remote/tokens/{args.token_id}",
         {"token_id": args.token_id, "access_token": tok} if tok else {"token_id": args.token_id},
+        args=args,
     )
     if local is not None:
         emit_response(local, save=args.save)
@@ -1457,8 +1463,20 @@ def handle_backtest_monitoring_holdings(args: argparse.Namespace) -> None:
     emit_response(_client(args).request("GET", "/backtest/monitoring/holdings", params=params), save=args.save)
 
 
-def _wechat_local_response(method: str, api_path: str, payload: dict) -> Any | None:
-    """如果路由在本地 wechat 模块已实现，返回伪 ApiResponse；否则返回 None。"""
+def _has_explicit_api_base(args: argparse.Namespace | None) -> bool:
+    if args is None:
+        return bool(os.environ.get("GH_UI_API_BASE", "").strip())
+    api_base = getattr(args, "api_base", None)
+    if api_base:
+        return True
+    return bool(os.environ.get("GH_UI_API_BASE", "").strip())
+
+
+def _wechat_local_response(method: str, api_path: str, payload: dict, args: argparse.Namespace | None = None) -> Any | None:
+    """如果路由在本地 wechat 模块已实现，返回伪 ApiResponse；否则返回 None。
+    用户显式指定 --api-base 时跳过本地分发，让请求走远端 sidecar。"""
+    if _has_explicit_api_base(args):
+        return None
     from .wechat import dispatch as wx_dispatch
 
     cap_id = wx_dispatch.resolve_capability(method, api_path)
@@ -1480,7 +1498,7 @@ def _wechat_local_response(method: str, api_path: str, payload: dict) -> Any | N
 
 def handle_wechat_simple(args: argparse.Namespace) -> None:
     params = parse_key_values(args.param)
-    local = _wechat_local_response(args.http_method, args.api_path, params)
+    local = _wechat_local_response(args.http_method, args.api_path, params, args=args)
     if local is not None:
         emit_response(local, save=args.save)
         return
@@ -1490,7 +1508,7 @@ def handle_wechat_simple(args: argparse.Namespace) -> None:
 def handle_wechat_json(args: argparse.Namespace) -> None:
     body = read_json_arg(args.json, default={})
     payload = body if isinstance(body, dict) else {}
-    local = _wechat_local_response(args.http_method, args.api_path, payload)
+    local = _wechat_local_response(args.http_method, args.api_path, payload, args=args)
     if local is not None:
         emit_response(local, save=args.save)
         return
