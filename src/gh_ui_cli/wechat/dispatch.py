@@ -29,6 +29,10 @@ ROUTE_MAP: dict[str, str] = {
     "GET /api/wechat/password/status": "op:wechat:password-status",
     "POST /api/wechat/password/auto": "op:wechat:password-auto",
     "POST /api/wechat/macos/resign-wechat": "op:wechat:macos-resign",
+    "GET /api/wechat/sessions": "op:wechat:sessions",
+    "POST /api/wechat/messages/search": "op:wechat:messages-search",
+    "GET /api/wechat/search/stats": "op:wechat:search-stats",
+    "GET /api/wechat/contacts/export": "op:wechat:contacts-export",
 }
 
 
