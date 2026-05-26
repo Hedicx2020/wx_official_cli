@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
+from . import ai as _ai_pkg  # noqa: F401  注册 op:ai:* capability
 from . import backtest as _backtest_pkg  # noqa: F401  注册 op:backtest:* capability
 from . import data as _data_pkg  # noqa: F401  注册 op:data:* capability
 from . import factor as _factor_pkg  # noqa: F401  注册 op:factor:* capability

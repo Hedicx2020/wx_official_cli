@@ -102,6 +102,14 @@ ROUTE_MAP: dict[str, str] = {
     "GET /api/backtest/sample-portfolio": "op:backtest:sample-portfolio",
     "POST /api/backtest/run": "op:backtest:run",
     "GET /api/backtest/results/{task_id}": "op:backtest:result",
+    # AI 报告复现
+    "GET /api/ai/status": "op:ai:status",
+    "GET /api/ai/report-reproduce/projects": "op:ai:report-projects",
+    "GET /api/ai/report-reproduce/pdf-candidates": "op:ai:report-pdf-candidates",
+    "GET /api/ai/report-reproduce/tasks": "op:ai:report-tasks",
+    "GET /api/ai/report-reproduce/tasks/{task_id}": "op:ai:report-task",
+    "POST /api/ai/report-reproduce/tasks/{task_id}/cancel": "op:ai:report-task-cancel",
+    "POST /api/ai/report-reproduce/start": "op:ai:report-start",
 }
 
 
