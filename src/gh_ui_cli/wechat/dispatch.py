@@ -94,6 +94,14 @@ ROUTE_MAP: dict[str, str] = {
     "GET /api/factor/db/progress": "op:factor:progress",
     "POST /api/factor/db/download/{table}": "op:factor:download",
     "GET /api/factor/db/query/{table}": "op:factor:query",
+    # backtest
+    "GET /api/backtest/check-data": "op:backtest:check-data",
+    "GET /api/backtest/index-codes": "op:backtest:index-codes",
+    "POST /api/backtest/upload-portfolio-json": "op:backtest:upload-portfolio-json",
+    "GET /api/backtest/uploaded-portfolio/{upload_id}": "op:backtest:uploaded-portfolio",
+    "GET /api/backtest/sample-portfolio": "op:backtest:sample-portfolio",
+    "POST /api/backtest/run": "op:backtest:run",
+    "GET /api/backtest/results/{task_id}": "op:backtest:result",
 }
 
 
