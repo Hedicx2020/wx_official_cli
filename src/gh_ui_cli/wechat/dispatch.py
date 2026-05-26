@@ -86,6 +86,14 @@ ROUTE_MAP: dict[str, str] = {
     "POST /api/update/{module}/{method}": "op:data:update",
     "GET /api/local/files": "op:data:local-files",
     "GET /api/download/progress": "op:data:progress",
+    # factor
+    "GET /api/factor/db/databases": "op:factor:databases",
+    "GET /api/factor/db/tables": "op:factor:tables",
+    "GET /api/factor/db/catalog": "op:factor:catalog",
+    "GET /api/factor/db/values": "op:factor:values",
+    "GET /api/factor/db/progress": "op:factor:progress",
+    "POST /api/factor/db/download/{table}": "op:factor:download",
+    "GET /api/factor/db/query/{table}": "op:factor:query",
 }
 
 
