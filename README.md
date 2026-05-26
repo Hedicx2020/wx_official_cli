@@ -1,19 +1,37 @@
 # gh_ui_cli
 
-`gh_ui_cli` 是 `gh_quant_ui` 桌面端功能的命令行入口，面向本地 agent、脚本和 CI 调用。
+`gh_ui_cli` 是面向本地 agent、脚本和 CI 的命令行工具，**完整覆盖原 `gh_quant_ui` 桌面端的所有后端能力**。
 
-**微信模块已独立**：从 v0.2 起，`gh-ui wechat *` 全部子命令自带本地实现，
-**不再需要 gh_quant_ui 源码**也不需要运行中的 sidecar。其它模块（data / factor /
-backtest / ai / remote）仍保留 HTTP 与 source 双模式 wrapper，将在后续阶段逐步独立化。
+**全模块已独立**：从 v0.3 起，**所有 7 个模块**（wechat / system / data / factor / backtest / ai / remote）的核心子命令都自带本地实现，**不再需要 `gh_quant_ui` 源码或运行中的 sidecar**。
 
-面向普通用户的安装、连接、常用命令和排障说明见 [USER_GUIDE.md](USER_GUIDE.md)。
+当前能力覆盖：
+
+- 81 个本地 capability（`op:wechat:* / op:system:* / op:data:* / op:factor:* / op:backtest:* / op:ai:* / op:remote:*`）
+- 73 条 HTTP route → local capability 映射，`gh-ui` 子命令自动走本地分发
+- 283 个测试全部通过（unittest + pytest）
+
+面向普通用户的安装、连接、常用命令和排障说明见 [USER_GUIDE.md](USER_GUIDE.md)；
+完整设计与分阶段实施记录见 [docs/superpowers/specs/2026-05-26-wechat-standalone-design.md](docs/superpowers/specs/2026-05-26-wechat-standalone-design.md)。
 
 设计原则:
 
 - 默认输出 JSON，便于 agent 解析。
-- 微信模块（41 个核心端点）走本地 `gh_ui_cli/wechat/` 实现，零外部进程依赖。
-- 其它模块通过 `api request` 通用入口或显式子命令转发到 FastAPI / HTTP。
+- 所有模块走本地 `gh_ui_cli/<module>/` 实现，零外部进程依赖。
+- 显式 `--api-base` 时回落 HTTP 转发；无 api-base 时优先本地分发。
+- 私有依赖（JyPy / gh_backtest）lazy import，缺失时返回结构化错误码 `JYPY_MISSING` / `GH_BACKTEST_MISSING`。
 - 路径通过参数或环境变量覆盖，适配 macOS 和 Windows。
+
+## 模块矩阵
+
+| 模块 | 子命令前缀 | 核心能力 | 私有依赖 |
+|------|-----------|--------|---------|
+| `wechat/` | `gh-ui wechat *` | 配置 / 密钥扫描 / SQLCipher 解密 / 消息检索 / 联系人 / 公众号同步 / 图片解密 / LLM / PDF 报告 / 股票复盘 | 无（pycryptodome / akshare / pyecharts 等公开库） |
+| `system/` | `gh-ui health / config / logs / feedback / export / auth` | 健康检查 / 路径配置 / 日志 ring buffer / 反馈本地落盘 / Excel 导出 / hedicxl.cn 认证代理 | 无 |
+| `data/` | `gh-ui data query / files / progress / download / update` | 80+ 个 (module, method) → parquet 通用映射 + 通用过滤器 | download / update 需 JyPy |
+| `factor/` | `gh-ui factor *` | 本地 factor_info / factors 目录查询 + level1/level2 树 | download 需 sqlalchemy + JYDB |
+| `backtest/` | `gh-ui backtest *` | parquet readiness / 组合 CRUD / 任务调度 | run 需 gh_backtest |
+| `ai/` | `gh-ui ai *` | 研报复现工作区扫描 / PDF 候选 / codex+claude runner 后台任务 | 需本地 codex / claude CLI 在 PATH |
+| `remote/` | `gh-ui remote me / tokens *` | hedicxl.cn 账号 + API Token CRUD | 无（直接 httpx） |
 
 ## 安装与运行
 
@@ -40,16 +58,19 @@ uv run --extra full gh-ui --source-root /path/to/gh_quant_ui doctor
 
 常用环境变量:
 
-- `GH_QUANT_UI_PATH`: `gh_quant_ui` 项目根目录
-- `JYPY_PATH`: JyPy 仓库目录，默认 `~/JyPy`
-- `GH_BACKTEST_PATH`: `gh_backtest/src` 目录，默认 `~/gh_backtest/src`
+- `GH_WX_DATA_DIR`: 微信模块本地数据根目录，默认 `~/.gh_ui_cli/wechat`
 - `DB_PATH`: 本地 parquet 数据目录，默认 `~/local_data`
 - `FACTOR_PATH`: 因子 parquet 数据目录，默认跟随 `DB_PATH`
-- `GH_UI_API_BASE`: 已运行的 API 服务地址，例如 `http://127.0.0.1:8765`
-- `GH_API_TOKEN`: 聚源/JYDB 完整 API Token
-- `GH_ACCESS_TOKEN`: 登录后用于换取完整 API Token 的访问令牌
+- `GH_EXPORT_PATH`: Excel 导出目录，默认 `~/Desktop`
+- `REPORT_REPRODUCE_PATH`: AI 报告复现工作区，默认 `~/report_reproduce`
+- `GH_FACTOR_DB_URL`: 因子 SQL 在线下载，例如 `mysql+pymysql://user:pw@host:port/factor`
+- `GH_UI_API_BASE`: 显式指定 sidecar 地址（设置后跳过本地分发走 HTTP），例如 `http://127.0.0.1:8765`
+- `GH_API_TOKEN`: 聚源/JYDB 完整 API Token（data download/update 用）
+- `GH_ACCESS_TOKEN`: hedicxl.cn 登录后的 access token（remote / auth active-token 用）
 - `GH_JYDB_SERVER`: 聚源服务，`primary` 或 `secondary`
 - `GH_UI_CLI_PROFILE`: CLI profile 文件路径，默认 `~/.gh_ui_cli/profile.json`
+- `GH_QUANT_UI_PATH`（兼容）: 旧 source mode 下指向 `gh_quant_ui` 项目根；独立化后不再需要
+- `JYPY_PATH` / `GH_BACKTEST_PATH`（兼容）: 把这两个私有库源码目录加到 `PYTHONPATH` 才能用 data download / backtest run
 
 给 agent 长期调用时，可以把常用 token 和 server 写入本地 profile；显式命令行参数优先，其次环境变量，最后读取 profile。profile 输出会隐藏 token 明文。
 
@@ -59,7 +80,56 @@ uv run gh-ui profile get
 uv run gh-ui profile clear
 ```
 
-## 快速检查
+## 快速试用（推荐：不依赖 `gh_quant_ui`）
+
+```bash
+# 健康检查（本地分发，不需要 sidecar）
+uv run gh-ui health
+uv run gh-ui config get-paths
+
+# 微信本地工具
+uv run gh-ui wechat config-get
+uv run gh-ui wechat password-status
+
+# 本地 parquet 数据
+uv run gh-ui data progress
+uv run gh-ui data files
+uv run gh-ui data query stock stock_code -p market=ashare --limit 5
+
+# 因子库 / 回测 / AI 报告复现
+uv run gh-ui factor tables
+uv run gh-ui backtest check-data
+uv run gh-ui ai status
+
+# 远程账号 (需要 GH_ACCESS_TOKEN 或 profile)
+uv run gh-ui remote me
+```
+
+需要让 agent 知道有哪些本地能力可调用：
+
+```bash
+uv run gh-ui manifest --category cli
+uv run gh-ui manifest --category data
+uv run gh-ui manifest --category wechat
+```
+
+## 兼容旧模式（HTTP / source）
+
+如果桌面端 sidecar 已经在 `127.0.0.1:8765` 运行，显式 `--api-base` 跳过本地分发走 HTTP：
+
+```bash
+uv run gh-ui --api-base http://127.0.0.1:8765 smoke --with-data-query
+uv run gh-ui --api-base http://127.0.0.1:8765 wechat config-get
+```
+
+仍想加载 `gh_quant_ui` 源码做 source-mode 验证：
+
+```bash
+uv run --extra full gh-ui --source-root /path/to/gh_quant_ui doctor
+uv run --extra full gh-ui --source-root /path/to/gh_quant_ui verify --with-data-query
+```
+
+## 跨平台验收工具（保留）
 
 ```bash
 uv run --extra full gh-ui doctor
@@ -311,37 +381,48 @@ uv run --extra full gh-ui serve --host 127.0.0.1 --port 8765
 
 ## 覆盖边界
 
-CLI 覆盖 `gh_quant_ui` 当前后端功能的方式:
+CLI 覆盖原 `gh_quant_ui` 后端功能的方式:
 
-- `api request`: 覆盖所有 `/api/*` FastAPI 路由。
-- `routes`: 从当前 source app 实时列出路由，新增端点无需改 CLI 即可调用。
-- `coverage`: 输出 route-to-command 和动态数据能力覆盖审计，适合 agent 在执行前确认可调用面。
-- `data/factor/backtest/wechat/ai/remote`: 对 agent 高频流程提供稳定子命令。
+- **本地分发 (默认)**: 73 条 HTTP route 已映射到 81 个 `op:*` capability，所有 `gh-ui <module> <cmd>` 子命令优先走本地实现，零外部进程依赖。
+- **HTTP 转发 (兼容)**: 显式 `--api-base` 时绕过本地分发，对接已运行的 `gh_quant_ui` sidecar。
+- **Source mode (兼容)**: 显式 `--source-root` 时加载 `gh_quant_ui/api/main.py` FastAPI app，主要供原项目仓库内的回归测试用。
+- **`api request` / `routes` / `coverage` / `manifest`**: 对 agent 高频流程提供稳定子命令；`coverage` / `routes` 仍读 FastAPI app，独立模式下可省略。
 
-底层能力仍依赖 `gh_quant_ui` 原项目和本机数据环境。例如微信解密、macOS 重签名、Windows 内存扫描、远程 JYDB 下载等功能的系统权限和平台限制与桌面版一致。
+**底层平台限制**:
+- 微信 macOS 重签名 / Windows pymem 内存扫描：与桌面端权限要求一致。
+- `data download/update`：需要 JyPy 私有库 + JYDB Token。无 JyPy 时返回 `JYPY_MISSING` 错误码。
+- `backtest run`：需要 gh_backtest 私有库。无 gh_backtest 时返回 `GH_BACKTEST_MISSING` 错误码。
+- `factor download`：需要 SQLAlchemy + pymysql + `GH_FACTOR_DB_URL`。
+- `ai report-start`：需要本机 `codex` 或 `claude` CLI 在 PATH 中。
+
+凡是不依赖以上私有库 / 外部 CLI 的能力，**都不再需要 `gh_quant_ui` 源码**。
 
 ## 跨平台约定
 
-macOS / Linux shell:
+macOS / Linux shell（独立模式优先，私有依赖按需）:
 
 ```bash
-export GH_QUANT_UI_PATH="$HOME/gh_quant_ui"
+# 完全独立化：不需要设置 GH_QUANT_UI_PATH
+uv run gh-ui health
+uv run gh-ui wechat password-status
+
+# 仅在用 data download / backtest run 时才需要私有库
 export JYPY_PATH="$HOME/JyPy"
 export GH_BACKTEST_PATH="$HOME/gh_backtest/src"
-uv run --extra full gh-ui doctor
-# 或者调用已运行的 API 服务
-uv run gh-ui --api-base http://127.0.0.1:8765 smoke --with-data-query
+uv run gh-ui data download stock stock_code --token "$GH_API_TOKEN"
 ```
 
 Windows PowerShell:
 
 ```powershell
-$env:GH_QUANT_UI_PATH = "C:\Users\you\gh_quant_ui"
+# 完全独立化
+uv run gh-ui health
+uv run gh-ui wechat password-status
+
+# 仅 data download / backtest run 时设置
 $env:JYPY_PATH = "C:\Users\you\JyPy"
 $env:GH_BACKTEST_PATH = "C:\Users\you\gh_backtest\src"
-uv run --extra full gh-ui doctor
-# 或者调用已运行的 API 服务
-uv run gh-ui --api-base http://127.0.0.1:8765 smoke --with-data-query
+uv run gh-ui data download stock stock_code --token $env:GH_API_TOKEN
 ```
 
 CLI 自身只使用 `pathlib`、环境变量、FastAPI in-process 调用和可选 HTTP 调用，路径参数都可通过 `--source-root`、`--db-path`、`--factor-path`、`--export-path` 显式传入。平台相关行为仍保留在原后端中：例如 macOS 微信重签名只在 macOS 有意义，Windows 微信密钥扫描依赖 Windows 权限和 `pymem`。
