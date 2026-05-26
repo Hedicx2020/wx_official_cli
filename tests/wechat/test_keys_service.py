@@ -1,0 +1,108 @@
+"""密钥服务测试 - 路径检测、读写 all_keys.json、password-status。"""
+
+from __future__ import annotations
+
+import json
+import os
+import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
+
+from gh_ui_cli.wechat.services import keys as keys_svc
+
+
+class KeysServiceTest(unittest.TestCase):
+    def _env(self, tmp: str, **extras: str):
+        return patch.dict("os.environ", {"GH_WX_DATA_DIR": tmp, **extras}, clear=False)
+
+    def test_load_returns_empty_when_no_file(self):
+        with TemporaryDirectory() as tmp:
+            with self._env(tmp):
+                self.assertEqual(keys_svc.load_keys(), {})
+
+    def test_save_and_load_round_trip(self):
+        with TemporaryDirectory() as tmp:
+            with self._env(tmp):
+                keys_svc.save_keys({"abc": "deadbeef" * 8})
+                self.assertEqual(keys_svc.load_keys(), {"abc": "deadbeef" * 8})
+
+    def test_load_corrupt_returns_empty(self):
+        with TemporaryDirectory() as tmp:
+            with self._env(tmp):
+                from gh_ui_cli.wechat import paths
+                paths.keys_path().write_text("garbage")
+                self.assertEqual(keys_svc.load_keys(), {})
+
+
+class DetectPlatformPathsTest(unittest.TestCase):
+    def test_darwin_with_db_storage(self):
+        with TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            root = home / "Library/Containers/com.tencent.xinWeChat/Data/Documents/xwechat_files/wxid_x/db_storage"
+            root.mkdir(parents=True)
+            with patch.dict("os.environ", {"HOME": str(home)}, clear=False):
+                with patch("platform.system", return_value="Darwin"):
+                    info = keys_svc.detect_platform_paths()
+        self.assertEqual(info["platform"], "darwin")
+        self.assertTrue(info["detected_path"].endswith("db_storage"))
+
+    def test_unsupported_platform(self):
+        with TemporaryDirectory() as tmp:
+            with patch.dict("os.environ", {"HOME": tmp}, clear=False):
+                with patch("platform.system", return_value="OS/2"):
+                    info = keys_svc.detect_platform_paths()
+        self.assertEqual(info["platform"], "os/2")
+        self.assertEqual(info["detected_path"], "")
+
+
+class PasswordStatusTest(unittest.TestCase):
+    def test_status_includes_summary(self):
+        with TemporaryDirectory() as tmp:
+            with patch.dict("os.environ", {"GH_WX_DATA_DIR": tmp, "HOME": tmp}, clear=False):
+                with patch("platform.system", return_value="Darwin"):
+                    out = keys_svc.password_status()
+        self.assertIn("platform", out)
+        self.assertIn("detected_path", out)
+        self.assertIn("configured_path", out)
+        self.assertIn("has_password", out)
+        self.assertIn("key_count", out)
+        self.assertFalse(out["has_password"])
+        self.assertEqual(out["key_count"], 0)
+
+    def test_status_reflects_stored_keys(self):
+        with TemporaryDirectory() as tmp:
+            with patch.dict("os.environ", {"GH_WX_DATA_DIR": tmp, "HOME": tmp}, clear=False):
+                keys_svc.save_keys({"salt1": "ff" * 32, "salt2": "ee" * 32})
+                from gh_ui_cli.wechat.services import config as config_svc
+                config_svc.save({"database_password": "aa" * 32})
+                with patch("platform.system", return_value="Darwin"):
+                    out = keys_svc.password_status()
+        self.assertTrue(out["has_password"])
+        self.assertEqual(out["key_count"], 2)
+
+
+class ResolveDbDirTest(unittest.TestCase):
+    def test_uses_configured_path_when_exists(self):
+        with TemporaryDirectory() as tmp:
+            target = Path(tmp) / "wx"
+            target.mkdir()
+            with patch.dict("os.environ", {"GH_WX_DATA_DIR": tmp, "HOME": tmp}, clear=False):
+                from gh_ui_cli.wechat.services import config as config_svc
+                config_svc.save({"wechat_files_path": str(target)})
+                resolved = keys_svc.resolve_db_dir()
+        self.assertEqual(resolved, str(target))
+
+    def test_falls_back_to_platform_detect(self):
+        with TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            root = home / "Library/Containers/com.tencent.xinWeChat/Data/Documents/xwechat_files/wxid_x/db_storage"
+            root.mkdir(parents=True)
+            with patch.dict("os.environ", {"GH_WX_DATA_DIR": tmp, "HOME": str(home)}, clear=False):
+                with patch("platform.system", return_value="Darwin"):
+                    resolved = keys_svc.resolve_db_dir()
+        self.assertTrue(resolved.endswith("db_storage"))
+
+
+if __name__ == "__main__":
+    unittest.main()

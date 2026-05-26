@@ -11,3 +11,4 @@ from . import (  # noqa: F401  保证 capability 被注册
     registry,
 )
 from .services import config as _config  # noqa: F401
+from .services import keys as _keys  # noqa: F401

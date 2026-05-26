@@ -26,6 +26,9 @@ class LocalResponse:
 ROUTE_MAP: dict[str, str] = {
     "GET /api/wechat/config": "op:wechat:config-get",
     "POST /api/wechat/config": "op:wechat:config-set",
+    "GET /api/wechat/password/status": "op:wechat:password-status",
+    "POST /api/wechat/password/auto": "op:wechat:password-auto",
+    "POST /api/wechat/macos/resign-wechat": "op:wechat:macos-resign",
 }
 
 
