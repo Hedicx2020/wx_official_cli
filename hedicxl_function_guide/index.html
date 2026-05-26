@@ -1,0 +1,441 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hedicxl.cn 功能截图介绍</title>
+<style>
+:root { color-scheme: light; --ink:#14213d; --muted:#5b677a; --line:#d9e2ef; --soft:#f4f7fb; }
+* { box-sizing:border-box; }
+body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,"Noto Sans SC",sans-serif; background:#f7f9fc; color:var(--ink); }
+header { padding:34px 42px 22px; background:#fff; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5; }
+h1 { margin:0 0 10px; font-size:28px; letter-spacing:0; }
+.summary { margin:0; color:var(--muted); line-height:1.65; max-width:1180px; }
+nav { display:flex; flex-wrap:wrap; gap:8px; padding:14px 42px; background:#eef4fb; border-bottom:1px solid var(--line); }
+nav a { color:#134f85; text-decoration:none; padding:7px 10px; border:1px solid #cbd9ea; background:white; border-radius:6px; font-size:13px; }
+main { padding:28px 42px 56px; }
+section { margin:0 0 34px; }
+h2 { font-size:21px; margin:0 0 16px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(430px,1fr)); gap:18px; }
+.card { background:#fff; border:1px solid var(--line); border-radius:8px; overflow:hidden; box-shadow:0 2px 12px rgba(20,33,61,.06); }
+.card-text { padding:16px 16px 12px; }
+.card h3 { margin:0 0 8px; font-size:18px; }
+.desc { margin:0 0 10px; color:#303c50; line-height:1.6; }
+.meta { margin:0; color:var(--muted); font-size:12px; line-height:1.55; }
+.tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.tag { font-size:12px; padding:4px 7px; background:var(--soft); border:1px solid #d8e4f2; border-radius:5px; color:#31415a; }
+.notice { margin:14px 0 0; padding:10px 12px; background:#fff8e6; border:1px solid #f0d38a; border-radius:6px; color:#684b08; font-size:13px; line-height:1.55; }
+img { display:block; width:100%; height:auto; border-top:1px solid var(--line); background:#eef3f8; }
+footer { padding:22px 42px; background:#fff; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+@media (max-width:760px) { header, nav, main, footer { padding-left:16px; padding-right:16px; } .grid { grid-template-columns:1fr; } h1 { font-size:23px; } }
+</style></head><body>
+<header><h1>hedicxl.cn 功能截图介绍</h1>
+<p class="summary">生成时间：2026-05-26 18:20:09。采集账号：Hedi。范围覆盖首页导航、登录后控制台、研究服务、因子与指数增强、报告/工具下载、评论表单、内部协同、JyPy 文档和账号相关页面。出于安全考虑，本报告没有提交评论/注册/找回密码/登出操作，也没有展开 API Token 或保存密码。</p></header>
+<nav><a href="#账号与控制台">账号与控制台</a><a href="#首页与导航">首页与导航</a><a href="#研究服务">研究服务</a><a href="#因子与指数增强">因子与指数增强</a><a href="#报告与下载">报告与下载</a><a href="#AI 与资料">AI 与资料</a><a href="#工具与文档">工具与文档</a><a href="#内部协同">内部协同</a></nav><main>
+<section id="账号与控制台"><h2>账号与控制台</h2><div class="grid">
+<article class="card"><div class="card-text">
+<h3>登录</h3>
+<p class="desc">账号登录入口，支持用户名或邮箱加密码登录；本截图不展示任何已输入密码。</p>
+<p class="meta">URL：https://hedicxl.cn/login
+<br>页面标题：$ 登录您的账户
+</p>
+<div class="tags"><span class="tag">按钮：登录</span><span class="tag">输入：用户名 或 邮箱 / ••••••••</span></div>
+</div>
+<img src="screenshots/01-login.png" alt="登录 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>控制台</h3>
+<p class="desc">登录后的个人中心，展示用户信息、积分、我的因子/报告/工具/订阅入口；API Token 保持折叠，避免泄露密钥。</p>
+<p class="meta">URL：https://hedicxl.cn/dashboard
+<br>页面标题：$ 控制台
+</p>
+<div class="tags"><span class="tag">按钮：[ 展开 ]</span></div>
+<p class="notice">安全说明：API Token 入口只保留折叠截图，未展开密钥。</p>
+</div>
+<img src="screenshots/04-dashboard.png" alt="控制台 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>我的报告</h3>
+<p class="desc">已下载或已购买研究报告的重复下载入口。</p>
+<p class="meta">URL：https://hedicxl.cn/dashboard/my-reports
+<br>页面标题：# 我的报告 / 风险信息引入深度学习模型 / 300指增深度学习方案
+</p>
+<div class="tags"><span class="tag">按钮：免费下载 / 免费下载</span></div>
+</div>
+<img src="screenshots/05-my-reports.png" alt="我的报告 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>我的工具</h3>
+<p class="desc">已下载工具的管理与重复下载入口。</p>
+<p class="meta">URL：https://hedicxl.cn/dashboard/my-tools
+<br>页面标题：# 我的工具 / 国海金工微信数据筛选工具 v2.5.1 / 国海金工微信数据筛选工具 v2.5.1 / 国海金工微信数据筛选工具 v2.4 / 国海金工微信数据筛选工具 v2.4 / 国海金工微信数据筛选工具 v2.4 / 国海金工微信数据筛选工具 v2.4 / 国海金工微信数据筛选工具 v2.4
+</p>
+<div class="tags"><span class="tag">按钮：免费下载 / 免费下载 / 免费下载 / 免费下载 / 免费下载 / 免费下载</span></div>
+</div>
+<img src="screenshots/06-my-tools.png" alt="我的工具 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>数据订阅入口</h3>
+<p class="desc">控制台中的数据订阅入口；当前访问结果为 404，报告中保留该状态作为功能检查证据。</p>
+<p class="meta">URL：https://hedicxl.cn/subscriptions
+<br>页面标题：404 / This page could not be found.
+</p>
+<p class="notice">当前检查结果：该入口返回 404。</p>
+</div>
+<img src="screenshots/07-subscriptions.png" alt="数据订阅入口 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>注册</h3>
+<p class="desc">新账号注册表单，需要邀请码、用户名、邮箱、姓名、公司和密码；本次只截图不提交。</p>
+<p class="meta">URL：https://hedicxl.cn/register
+<br>页面标题：$ 创建新账户
+</p>
+<div class="tags"><span class="tag">按钮：注册</span><span class="tag">输入：请输入邀请码 / your_username / you@example.com / 您的姓名 / 公司名称 / •••••••• / ••••••••</span></div>
+</div>
+<img src="screenshots/41-register.png" alt="注册 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>找回密码</h3>
+<p class="desc">找回密码邮箱表单；本次只截图不发送重置链接。</p>
+<p class="meta">URL：https://hedicxl.cn/forgot-password
+<br>页面标题：$ 找回密码
+</p>
+<div class="tags"><span class="tag">按钮：发送重置链接</span><span class="tag">输入：you@example.com</span></div>
+</div>
+<img src="screenshots/42-forgot-password.png" alt="找回密码 截图" loading="lazy"></article>
+</div></section>
+<section id="首页与导航"><h2>首页与导航</h2><div class="grid">
+<article class="card"><div class="card-text">
+<h3>首页</h3>
+<p class="desc">网站总览、最新更新、研究服务入口和团队介绍，是进入各功能模块的主入口。</p>
+<p class="meta">URL：https://hedicxl.cn/
+<br>页面标题：# &gt; 专业量化研究与数据服务 / &gt; 最新更新 / # &gt; 研究服务 / # &gt; 我们的团队
+</p>
+</div>
+<img src="screenshots/02-home.png" alt="首页 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>更新日志</h3>
+<p class="desc">按日期展示站点功能与资料更新记录。</p>
+<p class="meta">URL：https://hedicxl.cn/changelog
+<br>页面标题：# &gt; 更新日志
+</p>
+</div>
+<img src="screenshots/03-changelog.png" alt="更新日志 截图" loading="lazy"></article>
+</div></section>
+<section id="研究服务"><h2>研究服务</h2><div class="grid">
+<article class="card"><div class="card-text">
+<h3>选股</h3>
+<p class="desc">多因子模型、量化选股策略、因子面板和选股研究报告入口。</p>
+<p class="meta">URL：https://hedicxl.cn/stock-picking
+<br>页面标题：# &gt; 选股
+</p>
+</div>
+<img src="screenshots/08-stock-picking.png" alt="选股 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>择时</h3>
+<p class="desc">市场趋势判断与交易时机相关服务介绍。</p>
+<p class="meta">URL：https://hedicxl.cn/timing
+<br>页面标题：# &gt; 择时
+</p>
+</div>
+<img src="screenshots/16-timing.png" alt="择时 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>资产配置</h3>
+<p class="desc">组合优化、风险管理与资产配置相关服务介绍。</p>
+<p class="meta">URL：https://hedicxl.cn/asset-allocation
+<br>页面标题：# &gt; 资产配置
+</p>
+</div>
+<img src="screenshots/17-asset-allocation.png" alt="资产配置 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>基金研究</h3>
+<p class="desc">FOF 策略、基金评价与基金产品入口。</p>
+<p class="meta">URL：https://hedicxl.cn/fund-research
+<br>页面标题：# &gt; 基金研究
+</p>
+</div>
+<img src="screenshots/18-fund-research.png" alt="基金研究 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>衍生品</h3>
+<p class="desc">期权、期货与对冲策略相关服务介绍。</p>
+<p class="meta">URL：https://hedicxl.cn/derivatives
+<br>页面标题：# &gt; 衍生品
+</p>
+</div>
+<img src="screenshots/20-derivatives.png" alt="衍生品 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>金融产品</h3>
+<p class="desc">结构化金融产品设计相关服务介绍。</p>
+<p class="meta">URL：https://hedicxl.cn/financial-products
+<br>页面标题：# &gt; 金融产品
+</p>
+</div>
+<img src="screenshots/21-financial-products.png" alt="金融产品 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>固收量化</h3>
+<p class="desc">债券定价、利率分析和固收量化服务介绍。</p>
+<p class="meta">URL：https://hedicxl.cn/fixed-income
+<br>页面标题：# &gt; 固收量化
+</p>
+</div>
+<img src="screenshots/22-fixed-income.png" alt="固收量化 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>业务合作</h3>
+<p class="desc">业务合作与服务对接说明。</p>
+<p class="meta">URL：https://hedicxl.cn/partnership
+<br>页面标题：# &gt; 业务合作
+</p>
+</div>
+<img src="screenshots/36-partnership.png" alt="业务合作 截图" loading="lazy"></article>
+</div></section>
+<section id="因子与指数增强"><h2>因子与指数增强</h2><div class="grid">
+<article class="card"><div class="card-text">
+<h3>因子面板：近期因子排名</h3>
+<p class="desc">因子面板默认视图，展示近期因子排名及指数筛选入口。</p>
+<p class="meta">URL：https://hedicxl.cn/factors
+<br>页面标题：因子面板
+</p>
+<div class="tags"><span class="tag">按钮：近期因子排名 / 因子分析 / 指数增强表现 / 公募基金指数增强 / 2015 / 2016</span></div>
+</div>
+<img src="screenshots/09-factors-ranking.png" alt="因子面板：近期因子排名 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>因子面板：因子分析</h3>
+<p class="desc">切换到因子分析标签，查看因子统计分析视图。</p>
+<p class="meta">URL：https://hedicxl.cn/factors
+<br>页面标题：因子面板 / 总市值对数 因子分析 / 分年度指标
+</p>
+<div class="tags"><span class="tag">按钮：近期因子排名 / 因子分析 / 指数增强表现 / 公募基金指数增强 / 机器学习 / 估值</span><span class="tag">已点击“因子分析”</span></div>
+</div>
+<img src="screenshots/10-factors-analysis.png" alt="因子面板：因子分析 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>因子面板：指数增强表现</h3>
+<p class="desc">切换到指数增强表现标签，查看因子模型在指数增强上的表现。</p>
+<p class="meta">URL：https://hedicxl.cn/factors
+<br>页面标题：因子面板 / 策略净值曲线 / 分年度指标
+</p>
+<div class="tags"><span class="tag">按钮：近期因子排名 / 因子分析 / 指数增强表现 / 公募基金指数增强 / Combine_GRU36s-000300.SH / Combine_GRU36s-000905.SH</span><span class="tag">已点击“指数增强表现”</span></div>
+</div>
+<img src="screenshots/11-factors-index.png" alt="因子面板：指数增强表现 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>因子面板：公募基金指数增强</h3>
+<p class="desc">切换到公募基金指数增强标签，查看基金指数增强相关表现。</p>
+<p class="meta">URL：https://hedicxl.cn/factors
+<br>页面标题：因子面板
+</p>
+<div class="tags"><span class="tag">按钮：近期因子排名 / 因子分析 / 指数增强表现 / 公募基金指数增强 / 沪深300 / 中证500</span><span class="tag">已点击“公募基金指数增强”</span></div>
+</div>
+<img src="screenshots/12-factors-fund.png" alt="因子面板：公募基金指数增强 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>指数增强</h3>
+<p class="desc">独立指数增强表现页，可在不同模型和指数组合之间切换。</p>
+<p class="meta">URL：https://hedicxl.cn/enhanced-index
+<br>页面标题：指数增强表现 / 策略净值曲线 / 分年度指标
+</p>
+<div class="tags"><span class="tag">按钮：Combine_GRU36s-000300.SH / Combine_GRU36s-000905.SH / Combine_GRU36s-000852.SH / GRU_ML3-000300.SH / GRU_ML3-000905.SH / GRU_ML3-000852.SH</span></div>
+</div>
+<img src="screenshots/13-enhanced-index.png" alt="指数增强 截图" loading="lazy"></article>
+</div></section>
+<section id="报告与下载"><h2>报告与下载</h2><div class="grid">
+<article class="card"><div class="card-text">
+<h3>机器学习研究报告</h3>
+<p class="desc">机器学习、深度学习与集成学习选股报告下载页，底部带评论与反馈表单。</p>
+<p class="meta">URL：https://hedicxl.cn/reports/machine-learning
+<br>页面标题：# &gt; 机器学习研究报告 / 300指增深度学习方案 / 风险信息引入深度学习模型 / 深度学习GRU因子 / 多模式合成的GRU因子 / &gt; 评论与反馈
+</p>
+<div class="tags"><span class="tag">按钮：下载 / 下载 / 下载 / 下载 / 提交</span><span class="tag">输入：写下您的想法、建议或需求... / checkbox</span></div>
+<p class="notice">交互说明：下载按钮和评论表单已截图；未批量下载文件，也未提交评论。</p>
+</div>
+<img src="screenshots/14-ml-reports.png" alt="机器学习研究报告 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>因子研究报告</h3>
+<p class="desc">因子研究报告下载页，提供报告下载、返回因子面板和评论反馈功能。</p>
+<p class="meta">URL：https://hedicxl.cn/reports/factors_report
+<br>页面标题：# &gt; 因子研究报告 / 国海证券金工因子研究系列专题1：委托挂单手数蕴含的选股信息 / &gt; 评论与反馈
+</p>
+<div class="tags"><span class="tag">按钮：下载 / 提交</span><span class="tag">输入：写下您的想法、建议或需求... / checkbox</span></div>
+<p class="notice">交互说明：下载按钮和评论表单已截图；未批量下载文件，也未提交评论。</p>
+</div>
+<img src="screenshots/15-factor-reports.png" alt="因子研究报告 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>基金产品</h3>
+<p class="desc">基金产品资料下载页，带评论与反馈表单。</p>
+<p class="meta">URL：https://hedicxl.cn/fund-research/products
+<br>页面标题：# &gt; 基金产品 / AI产业趋势下的布局机会 / &gt; 评论与反馈
+</p>
+<div class="tags"><span class="tag">按钮：下载 / 提交</span><span class="tag">输入：写下您的想法、建议或需求... / checkbox</span></div>
+<p class="notice">交互说明：下载按钮和评论表单已截图；未批量下载文件，也未提交评论。</p>
+</div>
+<img src="screenshots/19-fund-products.png" alt="基金产品 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>资源下载中心</h3>
+<p class="desc">集中展示可下载资源，包括微信工具、配置文件、JyPy 数据包、文档和因子报告。</p>
+<p class="meta">URL：https://hedicxl.cn/downloads
+<br>页面标题：资源下载 / 微信数据筛选工具 v2.5.1 / 产品介绍视频 / 配置文件 / JyPy 数据包 / JyPy 使用文档 / 国海证券金工因子研究系列专题1：委托挂单手数蕴含的选股信息
+</p>
+<div class="tags"><span class="tag">按钮：下载 / 下载 / 下载 / 下载 / 下载 / 下载</span></div>
+</div>
+<img src="screenshots/35-downloads.png" alt="资源下载中心 截图" loading="lazy"></article>
+</div></section>
+<section id="AI 与资料"><h2>AI 与资料</h2><div class="grid">
+<article class="card"><div class="card-text">
+<h3>AI</h3>
+<p class="desc">机器学习、智能投研、OpenClaw、AI 编程、Skill 和 Workflow 入口。</p>
+<p class="meta">URL：https://hedicxl.cn/ai
+<br>页面标题：# &gt; AI
+</p>
+</div>
+<img src="screenshots/23-ai.png" alt="AI 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>OpenClaw</h3>
+<p class="desc">OpenClaw Windows 与云端部署教程下载页，带评论与反馈表单。</p>
+<p class="meta">URL：https://hedicxl.cn/ai/openclaw
+<br>页面标题：# &gt; OpenClaw / OpenClaw Windows 部署教程 v4 / OpenClaw 腾讯云服务器部署教程 / 云端部署教学视频 / &gt; 评论与反馈
+</p>
+<div class="tags"><span class="tag">按钮：下载 / 下载 / 提交</span><span class="tag">输入：写下您的想法、建议或需求... / checkbox</span></div>
+<p class="notice">交互说明：下载按钮和评论表单已截图；未批量下载文件，也未提交评论。</p>
+</div>
+<img src="screenshots/24-ai-openclaw.png" alt="OpenClaw 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>AI 编程</h3>
+<p class="desc">AI 编程系列教学视频和课件下载页，带评论与反馈表单。</p>
+<p class="meta">URL：https://hedicxl.cn/ai/coding
+<br>页面标题：# &gt; AI 编程 / 智能体设计与发展 · 第五期 / 高阶 Claude Code · 第四期 / 进阶 Claude Code · 第三期 / 进阶 Claude Code · 第二期 / 从零开始 Claude Code · 第一期 / &gt; 评论与反馈
+</p>
+<div class="tags"><span class="tag">按钮：下载课件 / 下载课件 / 下载课件 / 下载课件 / 下载课件 / 提交</span><span class="tag">输入：写下您的想法、建议或需求... / checkbox</span></div>
+<p class="notice">交互说明：下载按钮和评论表单已截图；未批量下载文件，也未提交评论。</p>
+</div>
+<img src="screenshots/25-ai-coding.png" alt="AI 编程 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>Skill 资源</h3>
+<p class="desc">AI Skill 资源下载页，包含公告爬取、杯柄形态、微信提取、iFinD API 等资源。</p>
+<p class="meta">URL：https://hedicxl.cn/ai/skill
+</p>
+<p class="notice">交互说明：下载按钮和评论表单已截图；未批量下载文件，也未提交评论。</p>
+</div>
+<img src="screenshots/26-ai-skill.png" alt="Skill 资源 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>WorkFlow 资源</h3>
+<p class="desc">AI Agent 工作流与 CLAUDE/量化任务模板下载页。</p>
+<p class="meta">URL：https://hedicxl.cn/ai/workflow
+<br>页面标题：# &gt; WorkFlow / module 研报复现 / CLAUDE.md / quant-pdf-reader.md / quant-coder.md / quant-verify.md / reproduce.md / &gt; 评论与反馈
+</p>
+<div class="tags"><span class="tag">按钮：下载 / 下载 / 下载 / 下载 / 下载 / 提交</span><span class="tag">输入：写下您的想法、建议或需求... / checkbox</span></div>
+<p class="notice">交互说明：下载按钮和评论表单已截图；未批量下载文件，也未提交评论。</p>
+</div>
+<img src="screenshots/27-ai-workflow.png" alt="WorkFlow 资源 截图" loading="lazy"></article>
+</div></section>
+<section id="工具与文档"><h2>工具与文档</h2><div class="grid">
+<article class="card"><div class="card-text">
+<h3>工具产品</h3>
+<p class="desc">工具产品总入口，包括量化终端、聚源 API 文档、微信数据库等。</p>
+<p class="meta">URL：https://hedicxl.cn/data-products
+<br>页面标题：# &gt; 工具产品
+</p>
+</div>
+<img src="screenshots/28-data-products.png" alt="工具产品 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>国海量化终端</h3>
+<p class="desc">量化研究、回测与因子分析桌面客户端下载页，区分 Windows 与 macOS 版本。</p>
+<p class="meta">URL：https://hedicxl.cn/tools/quant-terminal
+<br>页面标题：# &gt; 国海量化终端 / 版本信息 / 安装说明 / 国海量化终端 v0.7.0 · Windows / 国海量化终端 v0.7.0 · macOS / &gt; 评论与反馈
+</p>
+<div class="tags"><span class="tag">按钮：免费下载 / 免费下载 / 提交</span><span class="tag">输入：写下您的想法、建议或需求... / checkbox</span></div>
+<p class="notice">交互说明：下载按钮和评论表单已截图；未批量下载文件，也未提交评论。</p>
+</div>
+<img src="screenshots/29-quant-terminal.png" alt="国海量化终端 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>聚源 API 工具页</h3>
+<p class="desc">JyPy 数据包、使用文档下载和在线文档入口。</p>
+<p class="meta">URL：https://hedicxl.cn/tools/juyuan-api
+<br>页面标题：项目介绍 / JyPy 数据包 / JyPy 使用文档 / JyPy 使用文档 / &gt; 评论与反馈
+</p>
+<div class="tags"><span class="tag">按钮：下载 / 免费下载 / 提交</span><span class="tag">输入：写下您的想法、建议或需求... / checkbox</span></div>
+<p class="notice">交互说明：下载按钮和评论表单已截图；未批量下载文件，也未提交评论。</p>
+</div>
+<img src="screenshots/30-juyuan-api.png" alt="聚源 API 工具页 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>JyPy 文档首页</h3>
+<p class="desc">聚源 API 在线文档首页，包含快速开始、目录和搜索入口。</p>
+<p class="meta">URL：https://hedicxl.cn/docs/juyuan/index.html
+<br>页面标题：欢迎来到 JyPy 文档！ / 主要特性 / 快速开始 / 目录 / 索引和表格
+</p>
+<div class="tags"><span class="tag">输入：搜索文档 / check_keywords / area</span></div>
+</div>
+<img src="screenshots/31-juyuan-doc-index.png" alt="JyPy 文档首页 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>JyPy API 文档</h3>
+<p class="desc">在线 API 参考，覆盖 JyPy、Stock、Index、Fund、Future 等类。</p>
+<p class="meta">URL：https://hedicxl.cn/docs/juyuan/api.html
+<br>页面标题：项目文档 / JyPy 核心类 / Stock 股票类 / Index 指数类 / Fund 基金类 / Future 期货类
+</p>
+<div class="tags"><span class="tag">输入：搜索文档 / check_keywords / area</span></div>
+</div>
+<img src="screenshots/32-juyuan-doc-api.png" alt="JyPy API 文档 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>JyPy 文档搜索</h3>
+<p class="desc">在线文档搜索功能示例，使用非敏感关键词 Stock 展示搜索页面。</p>
+<p class="meta">URL：https://hedicxl.cn/docs/juyuan/search.html?q=Stock&amp;check_keywords=yes&amp;area=default
+<br>页面标题：正在搜索中..
+</p>
+<div class="tags"><span class="tag">输入：搜索文档 / check_keywords / area</span></div>
+</div>
+<img src="screenshots/33-juyuan-doc-search.png" alt="JyPy 文档搜索 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>JyPy 文档索引</h3>
+<p class="desc">在线文档的总索引页，按字母列出类和方法入口。</p>
+<p class="meta">URL：https://hedicxl.cn/docs/juyuan/genindex.html
+<br>页面标题：索引 / _ / F / G / I / J / M / S
+</p>
+<div class="tags"><span class="tag">输入：搜索文档 / check_keywords / area</span></div>
+</div>
+<img src="screenshots/33b-juyuan-doc-genindex.png" alt="JyPy 文档索引 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>JyPy 模块索引</h3>
+<p class="desc">在线文档的 Python 模块索引，列出 Stock、Index、Fund、Future 等模块。</p>
+<p class="meta">URL：https://hedicxl.cn/docs/juyuan/py-modindex.html
+<br>页面标题：Python 模块索引
+</p>
+<div class="tags"><span class="tag">输入：搜索文档 / check_keywords / area</span></div>
+</div>
+<img src="screenshots/33c-juyuan-doc-module-index.png" alt="JyPy 模块索引 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>微信数据库工具</h3>
+<p class="desc">微信聊天数据管理与分析工具资料页，包含安装包、提取工具、配置模板、用户手册和视频教程。</p>
+<p class="meta">URL：https://hedicxl.cn/tools/wechat-database
+<br>页面标题：# &gt; 微信数据库工具 / 项目介绍 / 更新日志 v2.5.1 (2026-02-28) / 国海金工微信数据筛选工具 v2.5.1 / gh-wx-extractor 数据提取工具 / WeChat 4.1.5 安装包 / DbkeyHook UI 工具 / 配置文件模板
+</p>
+<div class="tags"><span class="tag">按钮：下载 / 免费下载 / 免费下载 / 免费下载 / 免费下载 / 免费下载</span><span class="tag">输入：写下您的想法、建议或需求... / checkbox</span></div>
+<p class="notice">交互说明：下载按钮和评论表单已截图；未批量下载文件，也未提交评论。</p>
+</div>
+<img src="screenshots/34-wechat-database.png" alt="微信数据库工具 截图" loading="lazy"></article>
+</div></section>
+<section id="内部协同"><h2>内部协同</h2><div class="grid">
+<article class="card"><div class="card-text">
+<h3>内部协同：全部</h3>
+<p class="desc">内部协同总览，按文档、任务、笔记等类型展示团队内容。</p>
+<p class="meta">URL：https://hedicxl.cn/internal
+<br>页面标题：# &gt; 内部协同
+</p>
+<div class="tags"><span class="tag">按钮：$ count --type all 6 全部 / $ count --type doc 2 文档 / $ count --type task 2 任务 / $ count --type note 1 笔记</span></div>
+</div>
+<img src="screenshots/37-internal-all.png" alt="内部协同：全部 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>内部协同：文档筛选</h3>
+<p class="desc">内部协同按文档类型筛选。</p>
+<p class="meta">URL：https://hedicxl.cn/internal
+<br>页面标题：# &gt; 内部协同
+</p>
+<div class="tags"><span class="tag">按钮：$ count --type all 6 全部 / $ count --type doc 2 文档 / $ count --type task 2 任务 / $ count --type note 1 笔记</span><span class="tag">已点击“文档”</span></div>
+</div>
+<img src="screenshots/38-internal-doc.png" alt="内部协同：文档筛选 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>内部协同：任务筛选</h3>
+<p class="desc">内部协同按任务类型筛选。</p>
+<p class="meta">URL：https://hedicxl.cn/internal
+<br>页面标题：# &gt; 内部协同
+</p>
+<div class="tags"><span class="tag">按钮：$ count --type all 6 全部 / $ count --type doc 2 文档 / $ count --type task 2 任务 / $ count --type note 1 笔记</span><span class="tag">已点击“任务”</span></div>
+</div>
+<img src="screenshots/39-internal-task.png" alt="内部协同：任务筛选 截图" loading="lazy"></article>
+<article class="card"><div class="card-text">
+<h3>内部协同：笔记筛选</h3>
+<p class="desc">内部协同按笔记类型筛选。</p>
+<p class="meta">URL：https://hedicxl.cn/internal
+<br>页面标题：# &gt; 内部协同
+</p>
+<div class="tags"><span class="tag">按钮：$ count --type all 6 全部 / $ count --type doc 2 文档 / $ count --type task 2 任务 / $ count --type note 1 笔记</span><span class="tag">已点击“笔记”</span></div>
+</div>
+<img src="screenshots/40-internal-note.png" alt="内部协同：笔记筛选 截图" loading="lazy"></article>
+</div></section>
+</main><footer>截图数量：44。所有截图文件位于 screenshots/ 目录。</footer></body></html>

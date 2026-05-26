@@ -1,0 +1,1178 @@
+{
+  "generated_at": "2026-05-26 18:20:09",
+  "base": "https://hedicxl.cn",
+  "count": 44,
+  "errors": [],
+  "items": [
+    {
+      "slug": "01-login",
+      "title": "登录",
+      "path": "/login",
+      "desc": "账号登录入口，支持用户名或邮箱加密码登录；本截图不展示任何已输入密码。",
+      "category": "账号与控制台",
+      "full": false,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/login",
+      "headings": [
+        "$ 登录您的账户"
+      ],
+      "buttons": [
+        "登出",
+        "登录"
+      ],
+      "inputs": [
+        "用户名 或 邮箱",
+        "••••••••"
+      ],
+      "image": "screenshots/01-login.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "02-home",
+      "title": "首页",
+      "path": "/",
+      "desc": "网站总览、最新更新、研究服务入口和团队介绍，是进入各功能模块的主入口。",
+      "category": "首页与导航",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/",
+      "headings": [
+        "# > 专业量化研究与数据服务",
+        "> 最新更新",
+        "# > 研究服务",
+        "# > 我们的团队"
+      ],
+      "buttons": [],
+      "inputs": [],
+      "image": "screenshots/02-home.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "03-changelog",
+      "title": "更新日志",
+      "path": "/changelog",
+      "desc": "按日期展示站点功能与资料更新记录。",
+      "category": "首页与导航",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/changelog",
+      "headings": [
+        "# > 更新日志"
+      ],
+      "buttons": [],
+      "inputs": [],
+      "image": "screenshots/03-changelog.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "04-dashboard",
+      "title": "控制台",
+      "path": "/dashboard",
+      "desc": "登录后的个人中心，展示用户信息、积分、我的因子/报告/工具/订阅入口；API Token 保持折叠，避免泄露密钥。",
+      "category": "账号与控制台",
+      "full": false,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/dashboard",
+      "headings": [
+        "$ 控制台"
+      ],
+      "buttons": [
+        "登出",
+        "[ 展开 ]"
+      ],
+      "inputs": [],
+      "image": "screenshots/04-dashboard.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "05-my-reports",
+      "title": "我的报告",
+      "path": "/dashboard/my-reports",
+      "desc": "已下载或已购买研究报告的重复下载入口。",
+      "category": "账号与控制台",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/dashboard/my-reports",
+      "headings": [
+        "# 我的报告",
+        "风险信息引入深度学习模型",
+        "300指增深度学习方案"
+      ],
+      "buttons": [
+        "登出",
+        "免费下载",
+        "免费下载"
+      ],
+      "inputs": [],
+      "image": "screenshots/05-my-reports.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "06-my-tools",
+      "title": "我的工具",
+      "path": "/dashboard/my-tools",
+      "desc": "已下载工具的管理与重复下载入口。",
+      "category": "账号与控制台",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/dashboard/my-tools",
+      "headings": [
+        "# 我的工具",
+        "国海金工微信数据筛选工具 v2.5.1",
+        "国海金工微信数据筛选工具 v2.5.1",
+        "国海金工微信数据筛选工具 v2.4",
+        "国海金工微信数据筛选工具 v2.4",
+        "国海金工微信数据筛选工具 v2.4",
+        "国海金工微信数据筛选工具 v2.4",
+        "国海金工微信数据筛选工具 v2.4"
+      ],
+      "buttons": [
+        "登出",
+        "免费下载",
+        "免费下载",
+        "免费下载",
+        "免费下载",
+        "免费下载",
+        "免费下载",
+        "免费下载"
+      ],
+      "inputs": [],
+      "image": "screenshots/06-my-tools.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "07-subscriptions",
+      "title": "数据订阅入口",
+      "path": "/subscriptions",
+      "desc": "控制台中的数据订阅入口；当前访问结果为 404，报告中保留该状态作为功能检查证据。",
+      "category": "账号与控制台",
+      "full": false,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/subscriptions",
+      "headings": [
+        "404",
+        "This page could not be found."
+      ],
+      "buttons": [
+        "登出"
+      ],
+      "inputs": [],
+      "image": "screenshots/07-subscriptions.png",
+      "action_note": "",
+      "page_title": "404: This page could not be found."
+    },
+    {
+      "slug": "08-stock-picking",
+      "title": "选股",
+      "path": "/stock-picking",
+      "desc": "多因子模型、量化选股策略、因子面板和选股研究报告入口。",
+      "category": "研究服务",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/stock-picking",
+      "headings": [
+        "# > 选股"
+      ],
+      "buttons": [
+        "登出"
+      ],
+      "inputs": [],
+      "image": "screenshots/08-stock-picking.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "09-factors-ranking",
+      "title": "因子面板：近期因子排名",
+      "path": "/factors",
+      "desc": "因子面板默认视图，展示近期因子排名及指数筛选入口。",
+      "category": "因子与指数增强",
+      "full": false,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/factors",
+      "headings": [
+        "因子面板"
+      ],
+      "buttons": [
+        "登出",
+        "近期因子排名",
+        "因子分析",
+        "指数增强表现",
+        "公募基金指数增强",
+        "2015",
+        "2016",
+        "2017",
+        "2018",
+        "2019",
+        "2020",
+        "2021"
+      ],
+      "inputs": [],
+      "image": "screenshots/09-factors-ranking.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "10-factors-analysis",
+      "title": "因子面板：因子分析",
+      "path": "/factors",
+      "desc": "切换到因子分析标签，查看因子统计分析视图。",
+      "category": "因子与指数增强",
+      "full": false,
+      "action": "click_button:因子分析",
+      "wait": 1600,
+      "url": "https://hedicxl.cn/factors",
+      "headings": [
+        "因子面板",
+        "总市值对数 因子分析",
+        "分年度指标"
+      ],
+      "buttons": [
+        "登出",
+        "近期因子排名",
+        "因子分析",
+        "指数增强表现",
+        "公募基金指数增强",
+        "机器学习",
+        "估值",
+        "公司治理",
+        "分析师",
+        "动量",
+        "安全性",
+        "成长"
+      ],
+      "inputs": [],
+      "image": "screenshots/10-factors-analysis.png",
+      "action_note": "已点击“因子分析”",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "11-factors-index",
+      "title": "因子面板：指数增强表现",
+      "path": "/factors",
+      "desc": "切换到指数增强表现标签，查看因子模型在指数增强上的表现。",
+      "category": "因子与指数增强",
+      "full": false,
+      "action": "click_button:指数增强表现",
+      "wait": 1600,
+      "url": "https://hedicxl.cn/factors",
+      "headings": [
+        "因子面板",
+        "策略净值曲线",
+        "分年度指标"
+      ],
+      "buttons": [
+        "登出",
+        "近期因子排名",
+        "因子分析",
+        "指数增强表现",
+        "公募基金指数增强",
+        "Combine_GRU36s-000300.SH",
+        "Combine_GRU36s-000905.SH",
+        "Combine_GRU36s-000852.SH",
+        "GRU_ML3-000300.SH",
+        "GRU_ML3-000905.SH",
+        "GRU_ML3-000852.SH"
+      ],
+      "inputs": [],
+      "image": "screenshots/11-factors-index.png",
+      "action_note": "已点击“指数增强表现”",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "12-factors-fund",
+      "title": "因子面板：公募基金指数增强",
+      "path": "/factors",
+      "desc": "切换到公募基金指数增强标签，查看基金指数增强相关表现。",
+      "category": "因子与指数增强",
+      "full": false,
+      "action": "click_button:公募基金指数增强",
+      "wait": 1600,
+      "url": "https://hedicxl.cn/factors",
+      "headings": [
+        "因子面板"
+      ],
+      "buttons": [
+        "登出",
+        "近期因子排名",
+        "因子分析",
+        "指数增强表现",
+        "公募基金指数增强",
+        "沪深300",
+        "中证500",
+        "中证1000",
+        "全部",
+        "2024",
+        "2025",
+        "2026"
+      ],
+      "inputs": [],
+      "image": "screenshots/12-factors-fund.png",
+      "action_note": "已点击“公募基金指数增强”",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "13-enhanced-index",
+      "title": "指数增强",
+      "path": "/enhanced-index",
+      "desc": "独立指数增强表现页，可在不同模型和指数组合之间切换。",
+      "category": "因子与指数增强",
+      "full": false,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/enhanced-index",
+      "headings": [
+        "指数增强表现",
+        "策略净值曲线",
+        "分年度指标"
+      ],
+      "buttons": [
+        "登出",
+        "Combine_GRU36s-000300.SH",
+        "Combine_GRU36s-000905.SH",
+        "Combine_GRU36s-000852.SH",
+        "GRU_ML3-000300.SH",
+        "GRU_ML3-000905.SH",
+        "GRU_ML3-000852.SH"
+      ],
+      "inputs": [],
+      "image": "screenshots/13-enhanced-index.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "14-ml-reports",
+      "title": "机器学习研究报告",
+      "path": "/reports/machine-learning",
+      "desc": "机器学习、深度学习与集成学习选股报告下载页，底部带评论与反馈表单。",
+      "category": "报告与下载",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/reports/machine-learning",
+      "headings": [
+        "# > 机器学习研究报告",
+        "300指增深度学习方案",
+        "风险信息引入深度学习模型",
+        "深度学习GRU因子",
+        "多模式合成的GRU因子",
+        "> 评论与反馈"
+      ],
+      "buttons": [
+        "登出",
+        "下载",
+        "下载",
+        "下载",
+        "下载",
+        "提交"
+      ],
+      "inputs": [
+        "写下您的想法、建议或需求...",
+        "checkbox"
+      ],
+      "image": "screenshots/14-ml-reports.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "15-factor-reports",
+      "title": "因子研究报告",
+      "path": "/reports/factors_report",
+      "desc": "因子研究报告下载页，提供报告下载、返回因子面板和评论反馈功能。",
+      "category": "报告与下载",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/reports/factors_report",
+      "headings": [
+        "# > 因子研究报告",
+        "国海证券金工因子研究系列专题1：委托挂单手数蕴含的选股信息",
+        "> 评论与反馈"
+      ],
+      "buttons": [
+        "登出",
+        "下载",
+        "提交"
+      ],
+      "inputs": [
+        "写下您的想法、建议或需求...",
+        "checkbox"
+      ],
+      "image": "screenshots/15-factor-reports.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "16-timing",
+      "title": "择时",
+      "path": "/timing",
+      "desc": "市场趋势判断与交易时机相关服务介绍。",
+      "category": "研究服务",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/timing",
+      "headings": [
+        "# > 择时"
+      ],
+      "buttons": [
+        "登出"
+      ],
+      "inputs": [],
+      "image": "screenshots/16-timing.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "17-asset-allocation",
+      "title": "资产配置",
+      "path": "/asset-allocation",
+      "desc": "组合优化、风险管理与资产配置相关服务介绍。",
+      "category": "研究服务",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/asset-allocation",
+      "headings": [
+        "# > 资产配置"
+      ],
+      "buttons": [
+        "登出"
+      ],
+      "inputs": [],
+      "image": "screenshots/17-asset-allocation.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "18-fund-research",
+      "title": "基金研究",
+      "path": "/fund-research",
+      "desc": "FOF 策略、基金评价与基金产品入口。",
+      "category": "研究服务",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/fund-research",
+      "headings": [
+        "# > 基金研究"
+      ],
+      "buttons": [
+        "登出"
+      ],
+      "inputs": [],
+      "image": "screenshots/18-fund-research.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "19-fund-products",
+      "title": "基金产品",
+      "path": "/fund-research/products",
+      "desc": "基金产品资料下载页，带评论与反馈表单。",
+      "category": "报告与下载",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/fund-research/products",
+      "headings": [
+        "# > 基金产品",
+        "AI产业趋势下的布局机会",
+        "> 评论与反馈"
+      ],
+      "buttons": [
+        "登出",
+        "下载",
+        "提交"
+      ],
+      "inputs": [
+        "写下您的想法、建议或需求...",
+        "checkbox"
+      ],
+      "image": "screenshots/19-fund-products.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "20-derivatives",
+      "title": "衍生品",
+      "path": "/derivatives",
+      "desc": "期权、期货与对冲策略相关服务介绍。",
+      "category": "研究服务",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/derivatives",
+      "headings": [
+        "# > 衍生品"
+      ],
+      "buttons": [
+        "登出"
+      ],
+      "inputs": [],
+      "image": "screenshots/20-derivatives.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "21-financial-products",
+      "title": "金融产品",
+      "path": "/financial-products",
+      "desc": "结构化金融产品设计相关服务介绍。",
+      "category": "研究服务",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/financial-products",
+      "headings": [
+        "# > 金融产品"
+      ],
+      "buttons": [
+        "登出"
+      ],
+      "inputs": [],
+      "image": "screenshots/21-financial-products.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "22-fixed-income",
+      "title": "固收量化",
+      "path": "/fixed-income",
+      "desc": "债券定价、利率分析和固收量化服务介绍。",
+      "category": "研究服务",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/fixed-income",
+      "headings": [
+        "# > 固收量化"
+      ],
+      "buttons": [
+        "登出"
+      ],
+      "inputs": [],
+      "image": "screenshots/22-fixed-income.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "23-ai",
+      "title": "AI",
+      "path": "/ai",
+      "desc": "机器学习、智能投研、OpenClaw、AI 编程、Skill 和 Workflow 入口。",
+      "category": "AI 与资料",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/ai",
+      "headings": [
+        "# > AI"
+      ],
+      "buttons": [
+        "登出"
+      ],
+      "inputs": [],
+      "image": "screenshots/23-ai.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "24-ai-openclaw",
+      "title": "OpenClaw",
+      "path": "/ai/openclaw",
+      "desc": "OpenClaw Windows 与云端部署教程下载页，带评论与反馈表单。",
+      "category": "AI 与资料",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/ai/openclaw",
+      "headings": [
+        "# > OpenClaw",
+        "OpenClaw Windows 部署教程 v4",
+        "OpenClaw 腾讯云服务器部署教程",
+        "云端部署教学视频",
+        "> 评论与反馈"
+      ],
+      "buttons": [
+        "登出",
+        "下载",
+        "下载",
+        "提交"
+      ],
+      "inputs": [
+        "写下您的想法、建议或需求...",
+        "checkbox"
+      ],
+      "image": "screenshots/24-ai-openclaw.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "25-ai-coding",
+      "title": "AI 编程",
+      "path": "/ai/coding",
+      "desc": "AI 编程系列教学视频和课件下载页，带评论与反馈表单。",
+      "category": "AI 与资料",
+      "full": true,
+      "action": null,
+      "wait": 2600,
+      "url": "https://hedicxl.cn/ai/coding",
+      "headings": [
+        "# > AI 编程",
+        "智能体设计与发展 · 第五期",
+        "高阶 Claude Code · 第四期",
+        "进阶 Claude Code · 第三期",
+        "进阶 Claude Code · 第二期",
+        "从零开始 Claude Code · 第一期",
+        "> 评论与反馈"
+      ],
+      "buttons": [
+        "登出",
+        "下载课件",
+        "下载课件",
+        "下载课件",
+        "下载课件",
+        "下载课件",
+        "提交"
+      ],
+      "inputs": [
+        "写下您的想法、建议或需求...",
+        "checkbox"
+      ],
+      "image": "screenshots/25-ai-coding.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "26-ai-skill",
+      "title": "Skill 资源",
+      "path": "/ai/skill",
+      "desc": "AI Skill 资源下载页，包含公告爬取、杯柄形态、微信提取、iFinD API 等资源。",
+      "category": "AI 与资料",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/ai/skill",
+      "headings": [],
+      "buttons": [],
+      "inputs": [],
+      "image": "screenshots/26-ai-skill.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "27-ai-workflow",
+      "title": "WorkFlow 资源",
+      "path": "/ai/workflow",
+      "desc": "AI Agent 工作流与 CLAUDE/量化任务模板下载页。",
+      "category": "AI 与资料",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/ai/workflow",
+      "headings": [
+        "# > WorkFlow",
+        "module 研报复现",
+        "CLAUDE.md",
+        "quant-pdf-reader.md",
+        "quant-coder.md",
+        "quant-verify.md",
+        "reproduce.md",
+        "> 评论与反馈"
+      ],
+      "buttons": [
+        "登出",
+        "下载",
+        "下载",
+        "下载",
+        "下载",
+        "下载",
+        "提交"
+      ],
+      "inputs": [
+        "写下您的想法、建议或需求...",
+        "checkbox"
+      ],
+      "image": "screenshots/27-ai-workflow.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "28-data-products",
+      "title": "工具产品",
+      "path": "/data-products",
+      "desc": "工具产品总入口，包括量化终端、聚源 API 文档、微信数据库等。",
+      "category": "工具与文档",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/data-products",
+      "headings": [
+        "# > 工具产品"
+      ],
+      "buttons": [
+        "登出"
+      ],
+      "inputs": [],
+      "image": "screenshots/28-data-products.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "29-quant-terminal",
+      "title": "国海量化终端",
+      "path": "/tools/quant-terminal",
+      "desc": "量化研究、回测与因子分析桌面客户端下载页，区分 Windows 与 macOS 版本。",
+      "category": "工具与文档",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/tools/quant-terminal",
+      "headings": [
+        "# > 国海量化终端",
+        "版本信息",
+        "安装说明",
+        "国海量化终端 v0.7.0 · Windows",
+        "国海量化终端 v0.7.0 · macOS",
+        "> 评论与反馈"
+      ],
+      "buttons": [
+        "登出",
+        "免费下载",
+        "免费下载",
+        "提交"
+      ],
+      "inputs": [
+        "写下您的想法、建议或需求...",
+        "checkbox"
+      ],
+      "image": "screenshots/29-quant-terminal.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "30-juyuan-api",
+      "title": "聚源 API 工具页",
+      "path": "/tools/juyuan-api",
+      "desc": "JyPy 数据包、使用文档下载和在线文档入口。",
+      "category": "工具与文档",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/tools/juyuan-api",
+      "headings": [
+        "项目介绍",
+        "JyPy 数据包",
+        "JyPy 使用文档",
+        "JyPy 使用文档",
+        "> 评论与反馈"
+      ],
+      "buttons": [
+        "登出",
+        "下载",
+        "免费下载",
+        "提交"
+      ],
+      "inputs": [
+        "写下您的想法、建议或需求...",
+        "checkbox"
+      ],
+      "image": "screenshots/30-juyuan-api.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "31-juyuan-doc-index",
+      "title": "JyPy 文档首页",
+      "path": "/docs/juyuan/index.html",
+      "desc": "聚源 API 在线文档首页，包含快速开始、目录和搜索入口。",
+      "category": "工具与文档",
+      "full": false,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/docs/juyuan/index.html",
+      "headings": [
+        "欢迎来到 JyPy 文档！",
+        "主要特性",
+        "快速开始",
+        "目录",
+        "索引和表格"
+      ],
+      "buttons": [],
+      "inputs": [
+        "搜索文档",
+        "check_keywords",
+        "area"
+      ],
+      "image": "screenshots/31-juyuan-doc-index.png",
+      "action_note": "",
+      "page_title": "欢迎来到 JyPy 文档！ — JyPy 1.0.0 文档"
+    },
+    {
+      "slug": "32-juyuan-doc-api",
+      "title": "JyPy API 文档",
+      "path": "/docs/juyuan/api.html",
+      "desc": "在线 API 参考，覆盖 JyPy、Stock、Index、Fund、Future 等类。",
+      "category": "工具与文档",
+      "full": false,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/docs/juyuan/api.html",
+      "headings": [
+        "项目文档",
+        "JyPy 核心类",
+        "Stock 股票类",
+        "Index 指数类",
+        "Fund 基金类",
+        "Future 期货类"
+      ],
+      "buttons": [],
+      "inputs": [
+        "搜索文档",
+        "check_keywords",
+        "area"
+      ],
+      "image": "screenshots/32-juyuan-doc-api.png",
+      "action_note": "",
+      "page_title": "项目文档 — JyPy 1.0.0 文档"
+    },
+    {
+      "slug": "33-juyuan-doc-search",
+      "title": "JyPy 文档搜索",
+      "path": "/docs/juyuan/search.html?q=Stock&check_keywords=yes&area=default",
+      "desc": "在线文档搜索功能示例，使用非敏感关键词 Stock 展示搜索页面。",
+      "category": "工具与文档",
+      "full": false,
+      "action": null,
+      "wait": 2200,
+      "url": "https://hedicxl.cn/docs/juyuan/search.html?q=Stock&check_keywords=yes&area=default",
+      "headings": [
+        "正在搜索中.."
+      ],
+      "buttons": [],
+      "inputs": [
+        "搜索文档",
+        "check_keywords",
+        "area"
+      ],
+      "image": "screenshots/33-juyuan-doc-search.png",
+      "action_note": "",
+      "page_title": "搜索 — JyPy 1.0.0 文档"
+    },
+    {
+      "slug": "33b-juyuan-doc-genindex",
+      "title": "JyPy 文档索引",
+      "path": "/docs/juyuan/genindex.html",
+      "desc": "在线文档的总索引页，按字母列出类和方法入口。",
+      "category": "工具与文档",
+      "image": "screenshots/33b-juyuan-doc-genindex.png",
+      "url": "https://hedicxl.cn/docs/juyuan/genindex.html",
+      "page_title": "索引 — JyPy 1.0.0 文档",
+      "headings": [
+        "索引",
+        "_",
+        "F",
+        "G",
+        "I",
+        "J",
+        "M",
+        "S"
+      ],
+      "buttons": [],
+      "inputs": [
+        "搜索文档",
+        "check_keywords",
+        "area"
+      ],
+      "full": false,
+      "action": null,
+      "wait": 1600,
+      "action_note": ""
+    },
+    {
+      "slug": "33c-juyuan-doc-module-index",
+      "title": "JyPy 模块索引",
+      "path": "/docs/juyuan/py-modindex.html",
+      "desc": "在线文档的 Python 模块索引，列出 Stock、Index、Fund、Future 等模块。",
+      "category": "工具与文档",
+      "image": "screenshots/33c-juyuan-doc-module-index.png",
+      "url": "https://hedicxl.cn/docs/juyuan/py-modindex.html",
+      "page_title": "Python 模块索引 — JyPy 1.0.0 文档",
+      "headings": [
+        "Python 模块索引"
+      ],
+      "buttons": [],
+      "inputs": [
+        "搜索文档",
+        "check_keywords",
+        "area"
+      ],
+      "full": false,
+      "action": null,
+      "wait": 1600,
+      "action_note": ""
+    },
+    {
+      "slug": "34-wechat-database",
+      "title": "微信数据库工具",
+      "path": "/tools/wechat-database",
+      "desc": "微信聊天数据管理与分析工具资料页，包含安装包、提取工具、配置模板、用户手册和视频教程。",
+      "category": "工具与文档",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/tools/wechat-database",
+      "headings": [
+        "# > 微信数据库工具",
+        "项目介绍",
+        "更新日志 v2.5.1 (2026-02-28)",
+        "国海金工微信数据筛选工具 v2.5.1",
+        "gh-wx-extractor 数据提取工具",
+        "WeChat 4.1.5 安装包",
+        "DbkeyHook UI 工具",
+        "配置文件模板"
+      ],
+      "buttons": [
+        "下载",
+        "免费下载",
+        "免费下载",
+        "免费下载",
+        "免费下载",
+        "免费下载",
+        "提交"
+      ],
+      "inputs": [
+        "写下您的想法、建议或需求...",
+        "checkbox"
+      ],
+      "image": "screenshots/34-wechat-database.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "35-downloads",
+      "title": "资源下载中心",
+      "path": "/downloads",
+      "desc": "集中展示可下载资源，包括微信工具、配置文件、JyPy 数据包、文档和因子报告。",
+      "category": "报告与下载",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/downloads",
+      "headings": [
+        "资源下载",
+        "微信数据筛选工具 v2.5.1",
+        "产品介绍视频",
+        "配置文件",
+        "JyPy 数据包",
+        "JyPy 使用文档",
+        "国海证券金工因子研究系列专题1：委托挂单手数蕴含的选股信息"
+      ],
+      "buttons": [
+        "登出",
+        "下载",
+        "下载",
+        "下载",
+        "下载",
+        "下载",
+        "下载"
+      ],
+      "inputs": [],
+      "image": "screenshots/35-downloads.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "36-partnership",
+      "title": "业务合作",
+      "path": "/partnership",
+      "desc": "业务合作与服务对接说明。",
+      "category": "研究服务",
+      "full": true,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/partnership",
+      "headings": [
+        "# > 业务合作"
+      ],
+      "buttons": [
+        "登出"
+      ],
+      "inputs": [],
+      "image": "screenshots/36-partnership.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "37-internal-all",
+      "title": "内部协同：全部",
+      "path": "/internal",
+      "desc": "内部协同总览，按文档、任务、笔记等类型展示团队内容。",
+      "category": "内部协同",
+      "full": false,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/internal",
+      "headings": [
+        "# > 内部协同"
+      ],
+      "buttons": [
+        "登出",
+        "$ count --type all 6 全部",
+        "$ count --type doc 2 文档",
+        "$ count --type task 2 任务",
+        "$ count --type note 1 笔记"
+      ],
+      "inputs": [],
+      "image": "screenshots/37-internal-all.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "38-internal-doc",
+      "title": "内部协同：文档筛选",
+      "path": "/internal",
+      "desc": "内部协同按文档类型筛选。",
+      "category": "内部协同",
+      "full": false,
+      "action": "click_button:文档",
+      "wait": 1600,
+      "url": "https://hedicxl.cn/internal",
+      "headings": [
+        "# > 内部协同"
+      ],
+      "buttons": [
+        "登出",
+        "$ count --type all 6 全部",
+        "$ count --type doc 2 文档",
+        "$ count --type task 2 任务",
+        "$ count --type note 1 笔记"
+      ],
+      "inputs": [],
+      "image": "screenshots/38-internal-doc.png",
+      "action_note": "已点击“文档”",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "39-internal-task",
+      "title": "内部协同：任务筛选",
+      "path": "/internal",
+      "desc": "内部协同按任务类型筛选。",
+      "category": "内部协同",
+      "full": false,
+      "action": "click_button:任务",
+      "wait": 1600,
+      "url": "https://hedicxl.cn/internal",
+      "headings": [
+        "# > 内部协同"
+      ],
+      "buttons": [
+        "登出",
+        "$ count --type all 6 全部",
+        "$ count --type doc 2 文档",
+        "$ count --type task 2 任务",
+        "$ count --type note 1 笔记"
+      ],
+      "inputs": [],
+      "image": "screenshots/39-internal-task.png",
+      "action_note": "已点击“任务”",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "40-internal-note",
+      "title": "内部协同：笔记筛选",
+      "path": "/internal",
+      "desc": "内部协同按笔记类型筛选。",
+      "category": "内部协同",
+      "full": false,
+      "action": "click_button:笔记",
+      "wait": 1600,
+      "url": "https://hedicxl.cn/internal",
+      "headings": [
+        "# > 内部协同"
+      ],
+      "buttons": [
+        "登出",
+        "$ count --type all 6 全部",
+        "$ count --type doc 2 文档",
+        "$ count --type task 2 任务",
+        "$ count --type note 1 笔记"
+      ],
+      "inputs": [],
+      "image": "screenshots/40-internal-note.png",
+      "action_note": "已点击“笔记”",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "41-register",
+      "title": "注册",
+      "path": "/register",
+      "desc": "新账号注册表单，需要邀请码、用户名、邮箱、姓名、公司和密码；本次只截图不提交。",
+      "category": "账号与控制台",
+      "full": false,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/register",
+      "headings": [
+        "$ 创建新账户"
+      ],
+      "buttons": [
+        "登出",
+        "注册"
+      ],
+      "inputs": [
+        "请输入邀请码",
+        "your_username",
+        "you@example.com",
+        "您的姓名",
+        "公司名称",
+        "••••••••",
+        "••••••••"
+      ],
+      "image": "screenshots/41-register.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    },
+    {
+      "slug": "42-forgot-password",
+      "title": "找回密码",
+      "path": "/forgot-password",
+      "desc": "找回密码邮箱表单；本次只截图不发送重置链接。",
+      "category": "账号与控制台",
+      "full": false,
+      "action": null,
+      "wait": 1600,
+      "url": "https://hedicxl.cn/forgot-password",
+      "headings": [
+        "$ 找回密码"
+      ],
+      "buttons": [
+        "登出",
+        "发送重置链接"
+      ],
+      "inputs": [
+        "you@example.com"
+      ],
+      "image": "screenshots/42-forgot-password.png",
+      "action_note": "",
+      "page_title": "国海金融工程团队 - 专业量化研究与数据服务"
+    }
+  ],
+  "regenerated_at": "2026-05-26 18:24:27"
+}
