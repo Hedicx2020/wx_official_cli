@@ -14,6 +14,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
+from . import remote as _remote_pkg  # noqa: F401  注册 op:remote:* capability
+from . import wechat as _wechat_pkg  # noqa: F401  注册 op:wechat:* capability
 from .api_client import ApiError, LocalApiClient, create_api_client
 from .coverage_audit import (
     audit_backend,
@@ -1283,11 +1285,50 @@ def _bearer_token(access_token: str) -> str:
     return f"Bearer {access_token}"
 
 
+def _local_response(method: str, api_path: str, payload: dict) -> Any | None:
+    """通用本地分发：远程/数据/因子/回测/AI 都走这个入口。"""
+    from .wechat import dispatch as wx_dispatch
+
+    cap_id = wx_dispatch.resolve_capability(method, api_path)
+    if cap_id is None:
+        return None
+    local = wx_dispatch.call_local(cap_id, payload=payload)
+    return type(
+        "LocalApiResponse",
+        (),
+        {
+            "data": local.data,
+            "content": local.content,
+            "content_type": local.content_type,
+            "headers": local.headers or {},
+            "status_code": local.status_code,
+        },
+    )()
+
+
+def _resolve_access_token_value(args: argparse.Namespace) -> str | None:
+    headers = _access_headers(args) or {}
+    auth = headers.get("Authorization") or headers.get("authorization") or ""
+    if auth.lower().startswith("bearer "):
+        return auth[7:].strip() or None
+    return None
+
+
 def handle_remote_me(args: argparse.Namespace) -> None:
+    tok = _resolve_access_token_value(args)
+    local = _local_response("GET", "/api/remote/me", {"access_token": tok} if tok else {})
+    if local is not None:
+        emit_response(local, save=args.save)
+        return
     emit_response(_client(args).request("GET", "/remote/me", headers=_access_headers(args)), save=args.save)
 
 
 def handle_remote_tokens(args: argparse.Namespace) -> None:
+    tok = _resolve_access_token_value(args)
+    local = _local_response("GET", "/api/remote/tokens", {"access_token": tok} if tok else {})
+    if local is not None:
+        emit_response(local, save=args.save)
+        return
     emit_response(_client(args).request("GET", "/remote/tokens", headers=_access_headers(args)), save=args.save)
 
 
@@ -1299,6 +1340,13 @@ def handle_remote_token_generate(args: argparse.Namespace) -> None:
         body["name"] = args.name
     else:
         body.setdefault("name", None)
+    tok = _resolve_access_token_value(args)
+    if tok:
+        body["access_token"] = tok
+    local = _local_response("POST", "/api/remote/tokens", body)
+    if local is not None:
+        emit_response(local, save=args.save)
+        return
     emit_response(
         _client(args).request("POST", "/remote/tokens", json_body=body, headers=_access_headers(args)),
         save=args.save,
@@ -1306,6 +1354,15 @@ def handle_remote_token_generate(args: argparse.Namespace) -> None:
 
 
 def handle_remote_token_revoke(args: argparse.Namespace) -> None:
+    tok = _resolve_access_token_value(args)
+    local = _local_response(
+        "DELETE",
+        f"/api/remote/tokens/{args.token_id}",
+        {"token_id": args.token_id, "access_token": tok} if tok else {"token_id": args.token_id},
+    )
+    if local is not None:
+        emit_response(local, save=args.save)
+        return
     emit_response(
         _client(args).request(
             "DELETE",

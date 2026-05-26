@@ -1,7 +1,8 @@
 """把 (HTTP method, api path) 映射到本地 capability，并提供调用包装。
 
-这是新「不依赖 gh_quant_ui」路径的接入点。CLI 的 wechat handler 在拿到 path 后
-会优先调用 resolve_capability(); 命中时走 call_local() 而不再访问 FastAPI/HTTP。
+这是新「不依赖 gh_quant_ui」路径的接入点。CLI 的 wechat / remote / data 等 handler
+在拿到 path 后会优先调用 resolve_capability(); 命中时走 call_local() 而不再访问
+FastAPI/HTTP。
 """
 
 from __future__ import annotations
@@ -62,6 +63,11 @@ ROUTE_MAP: dict[str, str] = {
     "POST /api/wechat/articles/login/logout": "op:wechat:articles-login-logout",
     "GET /api/wechat/articles/login/qrcode": "op:wechat:articles-login-qrcode",
     "POST /api/wechat/articles/login/poll": "op:wechat:articles-login-poll",
+    # remote 账号 / Token
+    "GET /api/remote/me": "op:remote:me",
+    "GET /api/remote/tokens": "op:remote:tokens-list",
+    "POST /api/remote/tokens": "op:remote:tokens-generate",
+    "DELETE /api/remote/tokens/{token_id}": "op:remote:tokens-revoke",
 }
 
 
@@ -74,13 +80,43 @@ def _normalize(path: str) -> str:
     return norm
 
 
+def _normalize_with_placeholders(path: str, route_path: str) -> str:
+    """如果 route_path 含 {var}，按位置把 path 段替换回 {var} 用于查表。"""
+    norm = _normalize(path)
+    if "{" not in route_path:
+        return norm
+    rp = route_path.split("/")
+    np = norm.split("/")
+    if len(rp) != len(np):
+        return norm
+    out = []
+    for r, n in zip(rp, np):
+        if r.startswith("{") and r.endswith("}"):
+            out.append(r)
+        else:
+            out.append(n)
+    return "/".join(out)
+
+
 def route_map() -> dict[str, str]:
     return dict(ROUTE_MAP)
 
 
 def resolve_capability(method: str, path: str) -> str | None:
     key = f"{method.upper()} {_normalize(path)}"
-    return ROUTE_MAP.get(key)
+    hit = ROUTE_MAP.get(key)
+    if hit is not None:
+        return hit
+    # 含路径参数的端点：尝试按 {var} 占位匹配
+    method_u = method.upper()
+    for route_key, cap in ROUTE_MAP.items():
+        m, p = route_key.split(" ", 1)
+        if m != method_u or "{" not in p:
+            continue
+        rebuilt = _normalize_with_placeholders(path, p)
+        if rebuilt == p:
+            return cap
+    return None
 
 
 def call_local(cap_id: str, *, payload: dict[str, Any] | None = None) -> LocalResponse:
