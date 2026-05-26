@@ -1400,13 +1400,45 @@ def handle_backtest_monitoring_holdings(args: argparse.Namespace) -> None:
     emit_response(_client(args).request("GET", "/backtest/monitoring/holdings", params=params), save=args.save)
 
 
+def _wechat_local_response(method: str, api_path: str, payload: dict) -> Any | None:
+    """如果路由在本地 wechat 模块已实现，返回伪 ApiResponse；否则返回 None。"""
+    from .wechat import dispatch as wx_dispatch
+
+    cap_id = wx_dispatch.resolve_capability(method, api_path)
+    if cap_id is None:
+        return None
+    local = wx_dispatch.call_local(cap_id, payload=payload)
+    return type(
+        "WxLocalApiResponse",
+        (),
+        {
+            "data": local.data,
+            "content": local.content,
+            "content_type": local.content_type,
+            "headers": local.headers or {},
+            "status_code": local.status_code,
+        },
+    )()
+
+
 def handle_wechat_simple(args: argparse.Namespace) -> None:
-    emit_response(_client(args).request(args.http_method, args.api_path, params=parse_key_values(args.param)), save=args.save)
+    params = parse_key_values(args.param)
+    local = _wechat_local_response(args.http_method, args.api_path, params)
+    if local is not None:
+        emit_response(local, save=args.save)
+        return
+    emit_response(_client(args).request(args.http_method, args.api_path, params=params), save=args.save)
 
 
 def handle_wechat_json(args: argparse.Namespace) -> None:
+    body = read_json_arg(args.json, default={})
+    payload = body if isinstance(body, dict) else {}
+    local = _wechat_local_response(args.http_method, args.api_path, payload)
+    if local is not None:
+        emit_response(local, save=args.save)
+        return
     emit_response(
-        _client(args).request(args.http_method, args.api_path, json_body=read_json_arg(args.json, default={})),
+        _client(args).request(args.http_method, args.api_path, json_body=body),
         save=args.save,
     )
 

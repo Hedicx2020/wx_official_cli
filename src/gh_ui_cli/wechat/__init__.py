@@ -1,0 +1,13 @@
+"""gh_ui_cli 内置微信模块。
+
+本模块取代原 gh_quant_ui/api/wechat*.py + wechat_native/，使 gh-ui 不再需要
+gh_quant_ui 源码即可执行所有微信功能。
+"""
+
+from . import (  # noqa: F401  保证 capability 被注册
+    paths,
+    errors,
+    models,
+    registry,
+)
+from .services import config as _config  # noqa: F401
