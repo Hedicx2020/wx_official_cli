@@ -33,6 +33,35 @@ ROUTE_MAP: dict[str, str] = {
     "POST /api/wechat/messages/search": "op:wechat:messages-search",
     "GET /api/wechat/search/stats": "op:wechat:search-stats",
     "GET /api/wechat/contacts/export": "op:wechat:contacts-export",
+    # 图片
+    "GET /api/wechat/image/list": "op:wechat:image-list",
+    "GET /api/wechat/image/months": "op:wechat:image-months",
+    "POST /api/wechat/image/convert": "op:wechat:image-convert",
+    # LLM
+    "POST /api/wechat/llm/chat": "op:wechat:llm-chat",
+    "POST /api/wechat/llm/test": "op:wechat:llm-test",
+    "POST /api/wechat/llm/summarize": "op:wechat:llm-summarize",
+    # PDF
+    "POST /api/wechat/report/pdf": "op:wechat:report-pdf",
+    # 股票
+    "GET /api/wechat/stock/stats": "op:wechat:stock-stats",
+    "POST /api/wechat/stock/screener": "op:wechat:stock-screener",
+    "POST /api/wechat/stock/review": "op:wechat:stock-review",
+    "POST /api/wechat/stock/picks": "op:wechat:stock-picks",
+    # 公众号
+    "GET /api/wechat/articles/settings": "op:wechat:articles-settings",
+    "POST /api/wechat/articles/settings": "op:wechat:articles-settings-set",
+    "GET /api/wechat/articles/categories": "op:wechat:articles-categories",
+    "POST /api/wechat/articles/categories": "op:wechat:articles-categories-create",
+    "GET /api/wechat/articles/accounts": "op:wechat:articles-accounts",
+    "POST /api/wechat/articles/accounts/dedupe": "op:wechat:articles-accounts-dedupe",
+    "POST /api/wechat/articles/open_html_dir": "op:wechat:articles-open-html-dir",
+    "GET /api/wechat/articles/articles": "op:wechat:articles-list",
+    "POST /api/wechat/articles/sync_local": "op:wechat:articles-sync-local",
+    "GET /api/wechat/articles/login/status": "op:wechat:articles-login-status",
+    "POST /api/wechat/articles/login/logout": "op:wechat:articles-login-logout",
+    "GET /api/wechat/articles/login/qrcode": "op:wechat:articles-login-qrcode",
+    "POST /api/wechat/articles/login/poll": "op:wechat:articles-login-poll",
 }
 
 

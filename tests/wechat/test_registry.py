@@ -7,10 +7,12 @@ from gh_ui_cli.wechat import registry
 
 class RegistryTest(unittest.TestCase):
     def setUp(self):
+        self._saved = dict(registry._REGISTRY)
         registry._REGISTRY.clear()
 
     def tearDown(self):
         registry._REGISTRY.clear()
+        registry._REGISTRY.update(self._saved)
 
     def test_register_and_lookup(self):
         @registry.capability("op:wechat:config-get")
