@@ -14,3 +14,4 @@ from .services import config as _config  # noqa: F401
 from .services import keys as _keys  # noqa: F401
 from .services import messages as _messages  # noqa: F401
 from .services import contacts as _contacts  # noqa: F401
+from .services import articles as _articles  # noqa: F401
