@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
+from . import data as _data_pkg  # noqa: F401  注册 op:data:* capability
 from . import remote as _remote_pkg  # noqa: F401  注册 op:remote:* capability
 from . import system as _system_pkg  # noqa: F401  注册 op:system:* capability
 from . import wechat as _wechat_pkg  # noqa: F401  注册 op:wechat:* capability

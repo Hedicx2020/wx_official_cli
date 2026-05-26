@@ -80,6 +80,12 @@ ROUTE_MAP: dict[str, str] = {
     "POST /api/auth/login": "op:system:auth-login",
     "POST /api/auth/register": "op:system:auth-register",
     "POST /api/auth/active-token": "op:system:auth-active-token",
+    # data 通用数据查询/下载/更新
+    "GET /api/{module}/{method}": "op:data:query",
+    "POST /api/download/{module}/{method}": "op:data:download",
+    "POST /api/update/{module}/{method}": "op:data:update",
+    "GET /api/local/files": "op:data:local-files",
+    "GET /api/download/progress": "op:data:progress",
 }
 
 
