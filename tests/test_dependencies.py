@@ -63,7 +63,7 @@ class DependenciesTest(unittest.TestCase):
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
 
         self.assertIn('gh-ui = "gh_ui_cli.cli:main"', pyproject)
-        self.assertIn('wx-official-cli = "gh_ui_cli.cli:main"', pyproject)
+        self.assertIn('wx-official-cli = "gh_ui_cli.wx_official_cli:main"', pyproject)
 
 
 if __name__ == "__main__":

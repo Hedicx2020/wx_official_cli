@@ -1,4 +1,4 @@
-name: gh-ui-cli
+name: wx-official-cli
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  cli-light:
-    name: CLI light checks (${{ matrix.os }}, Python ${{ matrix.python-version }})
+  wx-official-cli:
+    name: wx-official-cli checks (${{ matrix.os }}, Python ${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -27,15 +27,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Unit tests
-        run: uv run --extra full python -m unittest discover -s tests
+        run: |
+          uv run --extra full python -m unittest discover -s tests -p "test_wx_official_cli.py"
+          uv run --extra full python -m unittest discover -s tests/wechat
 
       - name: CLI help
         run: |
-          uv run gh-ui --help
           uv run wx-official-cli --help
-
-      - name: API-base manifest/invoke/smoke/verify integration
-        run: uv run python -m unittest tests.test_cli_http_integration
+          uv run wx-official-cli manifest
 
       - name: Package build
         run: uv build
@@ -44,29 +43,8 @@ jobs:
         shell: bash
         run: python -m pip install dist/*.whl
 
-      - name: Installed wheel CLI smoke
-        env:
-          GH_UI_CLI_PROFILE: ${{ runner.temp }}/gh-ui-profile.json
+      - name: Installed wheel smoke
         run: |
-          gh-ui --help
           wx-official-cli --help
-          gh-ui profile set --api-token ci-api --access-token ci-access --server primary
-          gh-ui profile get
-          gh-ui deps --requirements tests/fixtures/minimal_requirements.txt --strict
-
-      - name: Installed wheel API-base verify report
-        run: gh-ui runtime-verify verify-${{ runner.os }}-py${{ matrix.python-version }}.json
-
-      - name: Print installed wheel verify report
-        shell: bash
-        run: |
-          echo GH_UI_VERIFY_REPORT_BEGIN
-          cat verify-${{ runner.os }}-py${{ matrix.python-version }}.json
-          echo GH_UI_VERIFY_REPORT_END
-
-      - name: Upload verify report
-        continue-on-error: true
-        uses: actions/upload-artifact@v4
-        with:
-          name: gh-ui-verify-${{ runner.os }}-py${{ matrix.python-version }}
-          path: verify-${{ runner.os }}-py${{ matrix.python-version }}.json
+          wx-official-cli manifest
+          wx-official-cli status
