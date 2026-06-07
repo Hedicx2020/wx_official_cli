@@ -35,8 +35,8 @@ def scan_from_wechat_cache() -> dict[str, Any]:
             {
                 "url": a.url,
                 "title": a.title,
-                "publisher": a.publisher,
-                "publish_ts": a.publish_ts,
+                "publisher": a.mp_name,
+                "publish_ts": a.published_at,
             }
             for a in found[:200]
         ],

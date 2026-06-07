@@ -36,6 +36,24 @@ class SyncTest(_Env):
         out = sync_svc.list_articles()
         self.assertEqual(out["total"], 0)
 
+    def test_scan_from_wechat_cache_serializes_local_article_fields(self):
+        scanned = [
+            LocalArticle(
+                url="https://mp.weixin.qq.com/s?__biz=biz_alpha&mid=1&idx=1",
+                title="Alpha 扫描摘要",
+                mp_name="Alpha 研究",
+                published_at=1_765_000_000,
+            )
+        ]
+
+        with patch("gh_ui_cli.wechat.services.keys.ensure_decrypted", return_value="/cache"):
+            with patch("gh_ui_cli.wechat.services.articles.sync.scan_local", return_value=scanned):
+                out = sync_svc.scan_from_wechat_cache()
+
+        self.assertEqual(out["count"], 1)
+        self.assertEqual(out["items"][0]["publisher"], "Alpha 研究")
+        self.assertEqual(out["items"][0]["publish_ts"], 1_765_000_000)
+
     def test_open_html_dir_creates_path(self):
         # Don't actually launch the explorer in tests; patch subprocess.Popen
         with patch("subprocess.Popen") as popen:
