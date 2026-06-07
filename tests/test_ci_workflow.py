@@ -36,5 +36,17 @@ class CiWorkflowTest(unittest.TestCase):
         self.assertLess(workflow.index("Install built wheel"), workflow.index("Installed wheel smoke"))
 
 
+class WindowsVerifierScriptTest(unittest.TestCase):
+    def test_windows_verifier_runs_from_script_repository_root(self):
+        script = (ROOT / "scripts" / "verify_windows_cache.ps1").read_text(encoding="utf-8")
+
+        self.assertIn("$RepoRoot = Resolve-Path", script)
+        self.assertIn("Push-Location $RepoRoot", script)
+        self.assertIn("finally {", script)
+        self.assertIn("Pop-Location", script)
+        self.assertLess(script.index("Push-Location $RepoRoot"), script.index("uv run wx-official-cli status"))
+        self.assertLess(script.index("Push-Location $RepoRoot"), script.index("uv run wx-official-cli verify"))
+
+
 if __name__ == "__main__":
     unittest.main()

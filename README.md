@@ -33,6 +33,8 @@ wx-official-cli --help
 .\scripts\verify_windows_cache.ps1 -AccountName "公众号名字"
 ```
 
+脚本会自动切换到仓库根目录执行，所以也可以从其他当前目录用完整脚本路径调用。
+
 脚本会先保存状态报告，再执行严格验收导出。默认输出：
 
 - `status-wechat-cache-windows.json`

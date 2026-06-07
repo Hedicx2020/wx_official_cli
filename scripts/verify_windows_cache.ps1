@@ -14,6 +14,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 
 function Test-WindowsHost {
     $isWindowsVariable = Get-Variable -Name IsWindows -ErrorAction SilentlyContinue
@@ -23,19 +24,25 @@ function Test-WindowsHost {
     return [System.Environment]::OSVersion.Platform -eq [System.PlatformID]::Win32NT
 }
 
-if (-not (Test-WindowsHost)) {
-    throw "This verifier must run on Windows with PC WeChat opened and logged in."
+Push-Location $RepoRoot
+try {
+    if (-not (Test-WindowsHost)) {
+        throw "This verifier must run on Windows with PC WeChat opened and logged in."
+    }
+
+    if ($WeChatFilesDir.Trim()) {
+        $env:WECHAT_FILES_DIR = $WeChatFilesDir
+    }
+
+    Write-Host "Checking local WeChat cache status..."
+    uv run wx-official-cli status --save $StatusPath
+
+    Write-Host "Verifying cached official-account articles..."
+    uv run wx-official-cli verify $AccountName --limit $Limit --output-dir $OutputDir --strict --save $ReportPath
+
+    Write-Host "Verification report: $ReportPath"
+    Write-Host "Status report: $StatusPath"
 }
-
-if ($WeChatFilesDir.Trim()) {
-    $env:WECHAT_FILES_DIR = $WeChatFilesDir
+finally {
+    Pop-Location
 }
-
-Write-Host "Checking local WeChat cache status..."
-uv run wx-official-cli status --save $StatusPath
-
-Write-Host "Verifying cached official-account articles..."
-uv run wx-official-cli verify $AccountName --limit $Limit --output-dir $OutputDir --strict --save $ReportPath
-
-Write-Host "Verification report: $ReportPath"
-Write-Host "Status report: $StatusPath"
