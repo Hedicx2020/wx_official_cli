@@ -35,7 +35,32 @@ WECHAT_PROCESS_NAMES = ("Weixin.exe", "WeChat.exe")
 def _kernel32():
     if ctypes is None:
         raise RuntimeError("scanner_win 仅在 Windows 可用")
-    return ctypes.windll.kernel32
+    k = ctypes.windll.kernel32
+    _configure_kernel32_api(k, ctypes)
+    return k
+
+
+def _configure_kernel32_api(k, ctypes_module) -> None:
+    win_types = ctypes_module.wintypes
+    k.OpenProcess.argtypes = [win_types.DWORD, win_types.BOOL, win_types.DWORD]
+    k.OpenProcess.restype = win_types.HANDLE
+    k.VirtualQueryEx.argtypes = [
+        win_types.HANDLE,
+        win_types.LPCVOID,
+        ctypes_module.POINTER(_MBI),
+        win_types.SIZE_T,
+    ]
+    k.VirtualQueryEx.restype = win_types.SIZE_T
+    k.ReadProcessMemory.argtypes = [
+        win_types.HANDLE,
+        win_types.LPCVOID,
+        win_types.LPVOID,
+        win_types.SIZE_T,
+        ctypes_module.POINTER(win_types.SIZE_T),
+    ]
+    k.ReadProcessMemory.restype = win_types.BOOL
+    k.CloseHandle.argtypes = [win_types.HANDLE]
+    k.CloseHandle.restype = win_types.BOOL
 
 
 class _MBI(ctypes.Structure if ctypes else object):  # type: ignore[misc]
@@ -83,7 +108,7 @@ def _read_mem(h, addr: int, size: int) -> Optional[bytes]:
     k = _kernel32()
     buf = ctypes.create_string_buffer(size)  # type: ignore[union-attr]
     n = ctypes.c_size_t(0)  # type: ignore[union-attr]
-    ok = k.ReadProcessMemory(h, ctypes.c_uint64(addr), buf, size, ctypes.byref(n))  # type: ignore[union-attr]
+    ok = k.ReadProcessMemory(h, ctypes.c_void_p(addr), buf, size, ctypes.byref(n))  # type: ignore[union-attr]
     if not ok:
         return None
     return buf.raw[: n.value]
@@ -96,7 +121,7 @@ def _enum_regions(h) -> list[tuple[int, int]]:
     addr = 0
     mbi = _MBI()
     while addr < 0x7FFF_FFFF_FFFF:
-        if k.VirtualQueryEx(h, ctypes.c_uint64(addr), ctypes.byref(mbi), ctypes.sizeof(mbi)) == 0:  # type: ignore[union-attr]
+        if k.VirtualQueryEx(h, ctypes.c_void_p(addr), ctypes.byref(mbi), ctypes.sizeof(mbi)) == 0:  # type: ignore[union-attr]
             break
         if (
             mbi.State == MEM_COMMIT
