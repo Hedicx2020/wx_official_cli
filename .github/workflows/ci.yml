@@ -26,6 +26,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Package build
+        run: uv build
+
       - name: Unit tests
         run: |
           uv run python -m unittest discover -s tests -p "test_wx_official_cli.py"
@@ -35,9 +38,6 @@ jobs:
         run: |
           uv run wx-official-cli --help
           uv run wx-official-cli manifest
-
-      - name: Package build
-        run: uv build
 
       - name: Install built wheel
         shell: bash

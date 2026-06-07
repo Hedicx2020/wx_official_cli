@@ -31,6 +31,7 @@ class CiWorkflowTest(unittest.TestCase):
         self.assertNotIn("runtime-verify", workflow)
         self.assertNotIn("with-data-query", workflow)
         self.assertNotIn("actions/upload-artifact@v4", workflow)
+        self.assertLess(workflow.index("Package build"), workflow.index("Unit tests"))
         self.assertLess(workflow.index("Package build"), workflow.index("Install built wheel"))
         self.assertLess(workflow.index("Install built wheel"), workflow.index("Installed wheel smoke"))
 
