@@ -259,6 +259,13 @@ class WxOfficialCliTest(unittest.TestCase):
         self.assertNotIn("password-auto", script)
         self.assertNotIn("articles-cache-export", script)
 
+    def test_windows_agent_verify_script_supports_windows_powershell_51(self):
+        script = Path("scripts/verify_windows_cache.ps1").read_text(encoding="utf-8")
+
+        self.assertIn("Get-Variable -Name IsWindows", script)
+        self.assertIn("[System.Environment]::OSVersion.Platform", script)
+        self.assertNotIn("if (-not $IsWindows)", script)
+
     def test_built_wheel_excludes_unrelated_business_packages(self):
         wheel = _latest_wheel()
         sdist = _latest_sdist()

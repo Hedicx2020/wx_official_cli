@@ -15,7 +15,15 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-if (-not $IsWindows) {
+function Test-WindowsHost {
+    $isWindowsVariable = Get-Variable -Name IsWindows -ErrorAction SilentlyContinue
+    if ($null -ne $isWindowsVariable) {
+        return [bool]$isWindowsVariable.Value
+    }
+    return [System.Environment]::OSVersion.Platform -eq [System.PlatformID]::Win32NT
+}
+
+if (-not (Test-WindowsHost)) {
     throw "This verifier must run on Windows with PC WeChat opened and logged in."
 }
 
