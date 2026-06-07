@@ -73,6 +73,7 @@ uv run wx-official-cli verify "公众号名字" --strict --save verify-wechat-ca
 
 `verify` 会实际运行导出流程，并检查微信缓存路径、微信进程可见性、数据库 key、文章数量和 HTML 文件写出情况。`--strict` 会在任一要求不满足时返回非零退出码。
 报告还会检查 `index.json` / `index.csv` 是否写出，并确认 `index.json` 中的文章数量与导出结果一致。
+如果本地已有的 `database_password` 与当前微信数据库不匹配，默认导出/验收会尝试从已登录微信进程重新提取本地数据库 key；agent 不要加 `--no-auto-password`。
 
 ## Agent Manifest
 

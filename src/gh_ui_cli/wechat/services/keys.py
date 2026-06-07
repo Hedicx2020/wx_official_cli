@@ -389,7 +389,23 @@ def ensure_decrypted() -> str:
         for db in dbs:
             if key_scan.verify_enc_key(single_bytes, db.page1):
                 keys[db.salt_hex] = single
+        if dbs and not keys:
+            raise KeyNotFound(
+                "当前 database_password 与微信数据库不匹配",
+                hint=(
+                    '去掉 --no-auto-password 后运行 wx-official-cli verify "公众号名字" '
+                    "--strict --save verify-wechat-cache-windows.json，让 CLI 从已登录微信进程重新提取本地数据库 key。"
+                ),
+            )
 
     from ..adapters import decrypt
-    decrypt.decrypt_all_dbs(db_dir, keys, cache_dir=str(cache_dir))
+    decrypted = decrypt.decrypt_all_dbs(db_dir, keys, cache_dir=str(cache_dir))
+    if not decrypted:
+        raise KeyNotFound(
+            "未能解密任何微信数据库",
+            hint=(
+                "确认 Windows 微信已打开并登录，然后运行 "
+                'wx-official-cli verify "公众号名字" --strict --save verify-wechat-cache-windows.json。'
+            ),
+        )
     return str(cache_dir)

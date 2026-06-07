@@ -6,12 +6,14 @@ import json
 import os
 import types
 import unittest
+import secrets
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from gh_ui_cli.wechat.errors import KeyNotFound
 from gh_ui_cli.wechat.services import keys as keys_svc
+from tests.wechat.test_crypto import _build_encrypted_db
 
 
 class KeysServiceTest(unittest.TestCase):
@@ -225,6 +227,23 @@ class EnsureDecryptedTest(unittest.TestCase):
         self.assertIn("wx-official-cli verify", ctx.exception.hint or "")
         self.assertIn("--no-auto-password", ctx.exception.hint or "")
         self.assertNotIn("password-auto", ctx.exception.hint or "")
+
+    def test_stale_single_database_password_raises_key_not_found(self):
+        with TemporaryDirectory() as tmp:
+            db_dir = Path(tmp) / "db_storage"
+            db_dir.mkdir()
+            encrypted_db, _salt = _build_encrypted_db(secrets.token_bytes(32), pages=1)
+            (db_dir / "message_0.db").write_bytes(encrypted_db)
+            stale_key = "00" * 32
+            with patch.dict("os.environ", {"GH_WX_DATA_DIR": tmp, "HOME": tmp}, clear=False):
+                from gh_ui_cli.wechat.services import config as config_svc
+
+                config_svc.save({"wechat_files_path": str(db_dir), "database_password": stale_key})
+                with self.assertRaises(KeyNotFound) as ctx:
+                    keys_svc.ensure_decrypted()
+
+        self.assertIn("不匹配", str(ctx.exception))
+        self.assertIn("wx-official-cli verify", ctx.exception.hint or "")
 
 
 if __name__ == "__main__":
