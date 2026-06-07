@@ -156,6 +156,63 @@ uv run gh-ui --api-base http://127.0.0.1:8765 data update stock stock_price \
 uv run gh-ui --api-base http://127.0.0.1:8765 wechat config-get
 ```
 
+### 自动检测微信缓存和解密 key
+
+本地模式可以不启动桌面端后端，直接检查微信缓存路径和本地解密 key 状态：
+
+```bash
+uv run gh-ui wechat password-status
+uv run gh-ui wechat password-auto
+```
+
+`password-auto` 的含义是：在用户已经打开并登录 PC 微信的前提下，扫描本机微信进程内存，提取本地 SQLCipher 数据库解密 key。它不是微信账号登录密码破解，也不能绕过登录。Windows 下会同时尝试 `Weixin.exe` 和旧版 `WeChat.exe` 进程名。
+
+Windows 会自动尝试常见目录，包括：
+
+- `%USERPROFILE%\Documents\WeChat Files`
+- `%APPDATA%\Tencent\WeChat\WeChat Files`
+- `%USERPROFILE%\xwechat_files`
+
+如果你在微信里把缓存目录移动到了其他盘，CLI 也会尝试读取 Windows 注册表中的 WeChat/Weixin 数据保存路径，以及重定向后的 Documents 路径作为候选。如果仍然检测不到路径，可以先手动保存：
+
+```bash
+uv run gh-ui wechat config-set --json '{"wechat_files_path":"C:\\Users\\me\\Documents\\WeChat Files\\wxid_x\\db_storage"}'
+```
+
+### 按公众号名字导出本地缓存文章
+
+先确保本机微信已登录。然后输入公众号名字，CLI 会在需要时自动执行 `password-auto` 获取本地数据库解密 key，再扫描已解密消息缓存，导入本地文章库，并用缓存里的 mp.weixin URL 抓取正文 HTML 写到本地目录。公众号名字匹配会容忍空格差异，例如输入 `Alpha研究` 也能匹配缓存中的 `Alpha 研究`：
+
+```bash
+uv run gh-ui wechat articles-cache-export "公众号名字" --limit 100 --output-dir ./wechat_articles
+```
+
+要生成目标验收报告，使用 `articles-cache-verify`。它会实际运行导出流程，并检查微信路径、数据库 key、文章数量和 HTML 文件是否写出；即使导出失败也会输出 `error` 和 `next_actions`。加 `--strict` 后任何一项不满足都会返回非零退出码：
+
+```bash
+uv run gh-ui wechat articles-cache-verify "公众号名字" --strict --save verify-wechat-cache.json
+```
+
+如果你已经手动配置好 `database_password`，并且不希望命令自动扫描进程，可以关闭自动获取 key：
+
+```bash
+uv run gh-ui wechat articles-cache-export "公众号名字" --no-auto-password
+```
+
+如果只想导出缓存里的标题、摘要、链接，不联网抓正文，可以关闭正文抓取：
+
+```bash
+uv run gh-ui wechat articles-cache-export "公众号名字" --no-fetch-html
+```
+
+输出目录会包含：
+
+- `index.json`: 机器可读的文章清单。
+- `index.csv`: Excel 可直接打开的文章清单，UTF-8 BOM 编码。
+- `001-标题.html` 等本地 HTML 文件，默认优先保存抓取到的正文 HTML。
+
+如果正文抓取失败，CLI 会生成占位 HTML，保留标题、摘要和微信原文链接；不会伪造正文内容。
+
 ### 搜索微信消息
 
 先创建 `wechat_search.json`：
@@ -267,11 +324,21 @@ uv run gh-ui profile set --api-token "$GH_API_TOKEN" --server primary
 
 ### Windows 验证未完成
 
-单台 macOS 机器通过不代表完整跨平台验收完成。需要在 Windows 环境运行：
+单台 macOS 机器通过不代表完整跨平台验收完成。需要在 Windows 环境做两类验证。
+
+第一类是 CLI runtime 验证：
 
 ```powershell
 uv run gh-ui runtime-verify verify-windows.json
 ```
+
+第二类是真实微信缓存验证。先打开并登录 Windows 微信，确认目标公众号文章已经出现在本机缓存里，然后运行：
+
+```powershell
+uv run gh-ui wechat articles-cache-verify "公众号名字" --strict --save verify-wechat-cache-windows.json
+```
+
+`verify-wechat-cache-windows.json` 中 `ok` 为 `true`，并且 `requirements.wechat_path_detected`、`requirements.database_key_available`、`requirements.articles_exported`、`requirements.html_files_written` 都为 `true`，才说明真实 Windows 微信缓存链路跑通。如果 `ok` 为 `false`，先看 `error` 和 `next_actions` 判断是路径、`Weixin.exe` / `WeChat.exe` 进程权限、数据库 key、公众号缓存，还是输出目录写入问题。
 
 然后合并 macOS 和 Windows 报告：
 

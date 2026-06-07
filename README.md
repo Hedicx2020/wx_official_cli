@@ -6,9 +6,9 @@
 
 当前能力覆盖：
 
-- 81 个本地 capability（`op:wechat:* / op:system:* / op:data:* / op:factor:* / op:backtest:* / op:ai:* / op:remote:*`）
+- 83 个本地 capability（`op:wechat:* / op:system:* / op:data:* / op:factor:* / op:backtest:* / op:ai:* / op:remote:*`）
 - 73 条 HTTP route → local capability 映射，`gh-ui` 子命令自动走本地分发
-- 283 个测试全部通过（unittest + pytest）
+- 304 个测试全部通过（unittest + pytest）
 
 面向普通用户的安装、连接、常用命令和排障说明见 [USER_GUIDE.md](USER_GUIDE.md)；
 完整设计与分阶段实施记录见 [docs/superpowers/specs/2026-05-26-wechat-standalone-design.md](docs/superpowers/specs/2026-05-26-wechat-standalone-design.md)。
@@ -235,7 +235,7 @@ gh-ui runtime-verify verify-runtime.json
 
 `manifest` 是给 agent 使用的可调用清单。它会输出稳定的 `id`、`category`、`command`、`generic`、`invoke`、`argv`、`generic_argv`、`invoke_argv`、`command_shell`、`generic_shell`、`invoke_shell`、`required_env`、路径参数、OpenAPI 参数、请求体 schema、前端 API 来源文件位置和是否需要替换路径占位符。源码模式下包含动态数据能力、因子表能力和 `src/lib/*.ts` 前端调用来源；`--api-base` 模式下从 `/openapi.json` 派生路由清单，适合复用已启动的桌面 sidecar。
 
-`manifest --category cli` 会暴露本地操作入口，例如 `profile get/set/clear`、`doctor`、`deps`、`coverage --summary`、`smoke`、`verify`、`verify-plan`、`verify-bundle`、`ci-status`、`ci-log-report`、`runtime-verify` 和 `verify-merge`。它不需要导入 `gh_quant_ui` 源码或访问 sidecar，适合作为 agent 初始自检入口。这些条目没有 `invoke_argv`，agent 应直接执行 `argv` 或按平台选择 `command_shell.posix`、`command_shell.powershell`、`command_shell.cmd`。
+`manifest --category cli` 会暴露本地操作入口，例如 `profile get/set/clear`、`doctor`、`deps`、`coverage --summary`、`smoke`、`verify`、`verify-plan`、`verify-bundle`、`ci-status`、`ci-log-report`、`runtime-verify` 和 `verify-merge`。`manifest --category wechat` 除后端 route 外，也会暴露本地目标命令 `articles-cache-export` 和 `articles-cache-verify`。这些条目不需要导入 `gh_quant_ui` 源码或访问 sidecar，适合作为 agent 初始自检入口；没有 `invoke_argv` 的条目应直接执行 `argv` 或按平台选择 `command_shell.posix`、`command_shell.powershell`、`command_shell.cmd`。
 
 给程序调用时优先使用 `invoke_argv`、`argv` 或 `generic_argv` 数组，而不是解析 shell 字符串。数组会自动带上当前 manifest 使用的全局参数，例如 `--api-base http://127.0.0.1:8765`，并把 token 统一表示为 `<GH_API_TOKEN>` 或 `<GH_ACCESS_TOKEN>`；调用前读取 `required_env` 就能知道需要准备 `GH_API_TOKEN` 还是 `GH_ACCESS_TOKEN`。如果调用方只能执行 shell 字符串，使用对应字段里的 `posix`、`powershell` 或 `cmd`，它们会分别渲染为 `$GH_API_TOKEN`、`$env:GH_API_TOKEN`、`%GH_API_TOKEN%` 这类平台原生环境变量。
 
@@ -371,7 +371,11 @@ uv run --extra full gh-ui wechat articles-categories
 uv run --extra full gh-ui wechat articles-category-create --name "研究"
 uv run --extra full gh-ui wechat articles-account-set-categories "$MP_ID" --category-id 1
 uv run --extra full gh-ui wechat articles-sync-by-category --json @sync_by_category.json
+uv run --extra full gh-ui wechat articles-cache-export "公众号名字" --limit 100 --output-dir ./wechat_articles
+uv run --extra full gh-ui wechat articles-cache-verify "公众号名字" --strict --save verify-wechat-cache.json
 ```
+
+`wechat password-auto` 只提取本机已登录微信客户端内存中的数据库解密 key，用来读取本地 SQLCipher 缓存；它不会破解微信账号登录密码，也不能绕过登录。Windows 会自动尝试 `%USERPROFILE%\Documents\WeChat Files`、`%APPDATA%\Tencent\WeChat`、`xwechat_files` 等常见目录，并会读取注册表中的 WeChat/Weixin 数据保存路径和重定向后的 Documents 路径作为候选，兼容用户把缓存目录移动到其他盘的情况；内存扫描会同时查找 `Weixin.exe` 和旧版 `WeChat.exe`。公众号缓存导出默认会在缺少解密 key 时先自动跑一次 `password-auto`，再扫描已解密消息缓存，并用缓存里的 mp.weixin URL 抓取正文 HTML 写入输出目录；按公众号名字匹配时会容忍空白差异，例如 `Alpha研究` 可匹配缓存中的 `Alpha 研究`。`articles-cache-verify` 会把路径、key、文章数量和 HTML 文件写出情况整理成可用于 Windows 真机验收的 JSON；导出失败时也会保留 `error` 和 `next_actions`，便于定位是路径、进程权限、key 还是缓存文章缺失。正文抓取失败时会回退为包含标题、摘要和原文链接的占位页；如需禁止自动获取 key，可加 `--no-auto-password`，如需只导出缓存元数据、不联网抓正文，可加 `--no-fetch-html`。
 
 启动本地 API 服务:
 
@@ -383,13 +387,13 @@ uv run --extra full gh-ui serve --host 127.0.0.1 --port 8765
 
 CLI 覆盖原 `gh_quant_ui` 后端功能的方式:
 
-- **本地分发 (默认)**: 73 条 HTTP route 已映射到 81 个 `op:*` capability，所有 `gh-ui <module> <cmd>` 子命令优先走本地实现，零外部进程依赖。
+- **本地分发 (默认)**: 73 条 HTTP route 已映射到 83 个 `op:*` capability，所有 `gh-ui <module> <cmd>` 子命令优先走本地实现，零外部进程依赖。
 - **HTTP 转发 (兼容)**: 显式 `--api-base` 时绕过本地分发，对接已运行的 `gh_quant_ui` sidecar。
 - **Source mode (兼容)**: 显式 `--source-root` 时加载 `gh_quant_ui/api/main.py` FastAPI app，主要供原项目仓库内的回归测试用。
 - **`api request` / `routes` / `coverage` / `manifest`**: 对 agent 高频流程提供稳定子命令；`coverage` / `routes` 仍读 FastAPI app，独立模式下可省略。
 
 **底层平台限制**:
-- 微信 macOS 重签名 / Windows pymem 内存扫描：与桌面端权限要求一致。
+- 微信 macOS 重签名 / Windows 内存扫描：与桌面端权限要求一致，只用于本机数据库解密 key 提取，不提供账号密码破解或登录绕过。
 - `data download/update`：需要 JyPy 私有库 + JYDB Token。无 JyPy 时返回 `JYPY_MISSING` 错误码。
 - `backtest run`：需要 gh_backtest 私有库。无 gh_backtest 时返回 `GH_BACKTEST_MISSING` 错误码。
 - `factor download`：需要 SQLAlchemy + pymysql + `GH_FACTOR_DB_URL`。
@@ -425,6 +429,6 @@ $env:GH_BACKTEST_PATH = "C:\Users\you\gh_backtest\src"
 uv run gh-ui data download stock stock_code --token $env:GH_API_TOKEN
 ```
 
-CLI 自身只使用 `pathlib`、环境变量、FastAPI in-process 调用和可选 HTTP 调用，路径参数都可通过 `--source-root`、`--db-path`、`--factor-path`、`--export-path` 显式传入。平台相关行为仍保留在原后端中：例如 macOS 微信重签名只在 macOS 有意义，Windows 微信密钥扫描依赖 Windows 权限和 `pymem`。
+CLI 自身只使用 `pathlib`、环境变量、FastAPI in-process 调用和可选 HTTP 调用，路径参数都可通过 `--source-root`、`--db-path`、`--factor-path`、`--export-path` 显式传入。平台相关行为仍保留在原后端中：例如 macOS 微信重签名只在 macOS 有意义，Windows 微信密钥扫描依赖 Windows 本机进程权限。
 
 仓库包含 GitHub Actions 轻量矩阵 `.github/workflows/ci.yml`，会在 `macos-latest` 和 `windows-latest` 上覆盖 Python 3.10 / 3.12，验证单元测试、`gh-ui --help`、mock sidecar 集成测试、`uv build` 包构建，以及安装构建出的 wheel 后再次运行 `gh-ui` console script。该集成测试会实际运行 `--api-base manifest`、`invoke`、`smoke --with-data-query` 和 `verify --with-data-query --strict`；安装后 smoke 会跑 `gh-ui deps --requirements tests/fixtures/minimal_requirements.txt --strict`，再跑 `gh-ui runtime-verify ...` 生成可上传的 runtime 报告，证明 wheel 在干净 Python 环境里的入口和基础 HTTP 调用链路可用。真实业务 smoke/verify 依赖私有的 `gh_quant_ui`、JyPy、`gh_backtest` 和本地数据目录，需在有这些路径的机器上运行 `uv run --extra full gh-ui verify --with-data-query --windows-deps-preflight --strict`。

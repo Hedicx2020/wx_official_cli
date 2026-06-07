@@ -250,6 +250,37 @@ class ManifestTest(unittest.TestCase):
             ],
         )
 
+    def test_exposes_local_wechat_cache_commands_for_agents(self):
+        manifest = build_agent_manifest(
+            {"routes": {"operations": []}, "data_capabilities": {}, "factor_data_capabilities": []},
+            category="wechat",
+            global_args=["--api-base", "http://127.0.0.1:8765"],
+        )
+
+        ids = {entry["id"]: entry for entry in manifest["entries"]}
+
+        self.assertIn("wechat:articles-cache-export", ids)
+        self.assertIn("wechat:articles-cache-verify", ids)
+        self.assertEqual(ids["wechat:articles-cache-export"]["kind"], "wechat_local")
+        self.assertEqual(
+            ids["wechat:articles-cache-verify"]["argv"],
+            [
+                "gh-ui",
+                "--api-base",
+                "http://127.0.0.1:8765",
+                "wechat",
+                "articles-cache-verify",
+                "<ACCOUNT_NAME>",
+                "--strict",
+                "--save",
+                "<VERIFY_JSON>",
+            ],
+        )
+        self.assertIn(
+            "articles-cache-verify",
+            ids["wechat:articles-cache-verify"]["command_shell"]["powershell"],
+        )
+
     def test_token_commands_use_portable_placeholder_in_argv(self):
         audit = {
             "routes": {"operations": []},

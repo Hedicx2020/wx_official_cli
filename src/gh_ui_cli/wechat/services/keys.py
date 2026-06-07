@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import os
 import platform
+import re
 from pathlib import Path
 
 from .. import paths
@@ -39,35 +40,197 @@ def save_keys(key_map: dict[str, str]) -> None:
 
 
 def detect_platform_paths() -> dict[str, str]:
-    """与原版相同：v4 优先，v3 fallback；Windows 看 ~/xwechat_files。"""
+    """检测微信数据库根目录。
+
+    Windows 兼容 PC 微信常见目录：
+    - %USERPROFILE%\\Documents\\WeChat Files\\<wxid>\\db_storage
+    - %APPDATA%\\Tencent\\WeChat\\WeChat Files\\<wxid>\\db_storage
+    - 新版 xwechat_files\\<wxid>\\db_storage
+    """
     sys_name = platform.system()
-    home = Path(os.environ.get("HOME") or str(Path.home()))
+    home = _platform_home(sys_name)
     candidates: list[Path] = []
     if sys_name == "Darwin":
         candidates.append(home / "Library/Containers/com.tencent.xinWeChat/Data/Documents/xwechat_files")
         candidates.append(home / "Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.tencent.xinWeChat")
     elif sys_name == "Windows":
-        candidates.append(home / "xwechat_files")
-        candidates.append(home / "Documents" / "xwechat_files")
+        candidates.extend(_windows_wechat_candidates(home))
     elif sys_name == "Linux":
         candidates.append(home / ".local/share/xwechat_files")
 
-    detected = ""
-    for c in candidates:
-        if not c.exists():
-            continue
-        for sub in c.rglob("db_storage"):
-            if sub.is_dir():
-                detected = str(sub)
-                break
-        if detected:
-            break
-        detected = str(c)
-        break
+    detected = _find_wechat_db_dir(candidates)
     return {
         "platform": "darwin" if sys_name == "Darwin" else sys_name.lower(),
         "detected_path": detected,
     }
+
+
+def _platform_home(sys_name: str) -> Path:
+    if sys_name == "Windows":
+        for key in ("USERPROFILE", "HOME"):
+            value = os.environ.get(key, "").strip()
+            if value:
+                return Path(value)
+    return Path(os.environ.get("HOME") or str(Path.home()))
+
+
+def _windows_wechat_candidates(home: Path) -> list[Path]:
+    candidates: list[Path] = []
+    for key in ("WECHAT_FILES_DIR", "WECHAT_FILES_PATH"):
+        value = os.environ.get(key, "").strip()
+        if value:
+            candidates.append(Path(value).expanduser())
+    candidates.extend(_windows_registry_wechat_candidates())
+    candidates.extend(_windows_documents_wechat_candidates())
+    appdata = os.environ.get("APPDATA", "").strip()
+    if appdata:
+        base = Path(appdata) / "Tencent" / "WeChat"
+        candidates.append(base / "WeChat Files")
+        candidates.append(base / "xwechat_files")
+    return _dedupe_paths([
+        *candidates,
+        home / "xwechat_files",
+        home / "Documents" / "xwechat_files",
+        home / "Documents" / "WeChat Files",
+        home / "WeChat Files",
+        home / "AppData" / "Roaming" / "Tencent" / "WeChat" / "WeChat Files",
+        home / "AppData" / "Roaming" / "Tencent" / "WeChat" / "xwechat_files",
+    ])
+
+
+def _windows_documents_wechat_candidates() -> list[Path]:
+    docs = _windows_registry_documents_dir()
+    if docs is None:
+        return []
+    return [
+        docs / "WeChat Files",
+        docs / "xwechat_files",
+    ]
+
+
+def _windows_registry_wechat_candidates() -> list[Path]:
+    try:
+        import winreg
+    except Exception:
+        return []
+
+    roots = [
+        getattr(winreg, "HKEY_CURRENT_USER", None),
+        getattr(winreg, "HKEY_LOCAL_MACHINE", None),
+    ]
+    subkeys = (
+        r"Software\Tencent\WeChat",
+        r"Software\Tencent\Weixin",
+        r"Software\WOW6432Node\Tencent\WeChat",
+        r"Software\WOW6432Node\Tencent\Weixin",
+    )
+    value_names = (
+        "FileSavePath",
+        "WeChatFilesPath",
+        "WechatFilesPath",
+        "WeixinFilesPath",
+        "DataSavePath",
+        "DataPath",
+        "SavePath",
+        "PersonalPath",
+    )
+
+    candidates: list[Path] = []
+    for root in [r for r in roots if r is not None]:
+        for subkey in subkeys:
+            handle = None
+            try:
+                handle = winreg.OpenKey(root, subkey)
+                for value_name in value_names:
+                    try:
+                        value, _value_type = winreg.QueryValueEx(handle, value_name)
+                    except OSError:
+                        continue
+                    if isinstance(value, str):
+                        candidates.extend(_windows_data_path_candidates(value))
+            except OSError:
+                continue
+            finally:
+                if handle is not None and hasattr(winreg, "CloseKey"):
+                    winreg.CloseKey(handle)
+    return _dedupe_paths(candidates)
+
+
+def _windows_registry_documents_dir() -> Path | None:
+    try:
+        import winreg
+    except Exception:
+        return None
+
+    root = getattr(winreg, "HKEY_CURRENT_USER", None)
+    if root is None:
+        return None
+    handle = None
+    try:
+        handle = winreg.OpenKey(
+            root,
+            r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders",
+        )
+        value, _value_type = winreg.QueryValueEx(handle, "Personal")
+    except OSError:
+        return None
+    finally:
+        if handle is not None and hasattr(winreg, "CloseKey"):
+            winreg.CloseKey(handle)
+    if not isinstance(value, str):
+        return None
+    expanded = _expand_windows_env_vars(value).strip().strip('"').strip("'")
+    return Path(expanded).expanduser() if expanded else None
+
+
+def _windows_data_path_candidates(raw_value: str) -> list[Path]:
+    value = _expand_windows_env_vars(raw_value).strip().strip('"').strip("'")
+    if not value or value.lower().startswith("mydocument:"):
+        return []
+
+    base = Path(value).expanduser()
+    candidates: list[Path] = []
+    if not re.fullmatch(r"[A-Za-z]:[\\/]*", value):
+        candidates.append(base)
+    if base.name.lower() not in {"wechat files", "xwechat_files", "db_storage"}:
+        candidates.append(base / "WeChat Files")
+        candidates.append(base / "xwechat_files")
+    return candidates
+
+
+def _expand_windows_env_vars(value: str) -> str:
+    def repl(match: re.Match[str]) -> str:
+        name = match.group(1)
+        return os.environ.get(name, match.group(0))
+
+    return re.sub(r"%([^%]+)%", repl, value)
+
+
+def _dedupe_paths(candidates: list[Path]) -> list[Path]:
+    seen: set[str] = set()
+    unique: list[Path] = []
+    for candidate in candidates:
+        key = str(candidate).lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(candidate)
+    return unique
+
+
+def _find_wechat_db_dir(candidates: list[Path]) -> str:
+    first_existing = ""
+    for c in candidates:
+        if not c.exists():
+            continue
+        if c.name == "db_storage" and c.is_dir():
+            return str(c)
+        if not first_existing:
+            first_existing = str(c)
+        for sub in c.rglob("db_storage"):
+            if sub.is_dir():
+                return str(sub)
+    return first_existing
 
 
 def resolve_db_dir() -> str:

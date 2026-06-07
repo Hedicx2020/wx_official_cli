@@ -116,6 +116,20 @@ CLI_COMMANDS = (
         "command": "gh-ui verify-merge <MAC_VERIFY_JSON> <WINDOWS_VERIFY_JSON_OR_DIR>",
     },
 )
+WECHAT_COMMANDS = (
+    {
+        "id": "wechat:articles-cache-export",
+        "name": "articles_cache_export",
+        "description": "Export local cached WeChat official-account articles by account name.",
+        "command": "gh-ui wechat articles-cache-export <ACCOUNT_NAME> --limit 100 --output-dir <OUTPUT_DIR>",
+    },
+    {
+        "id": "wechat:articles-cache-verify",
+        "name": "articles_cache_verify",
+        "description": "Run the real WeChat cache export path and emit a strict goal verification report.",
+        "command": "gh-ui wechat articles-cache-verify <ACCOUNT_NAME> --strict --save <VERIFY_JSON>",
+    },
+)
 
 
 def build_agent_manifest(
@@ -147,6 +161,7 @@ def build_agent_manifest(
         entries.extend(_factor_entries(item, normalized_global_args))
 
     entries.extend(_cli_entries(normalized_global_args))
+    entries.extend(_wechat_entries(normalized_global_args))
 
     if category:
         entries = [entry for entry in entries if entry["category"] == category]
@@ -292,6 +307,34 @@ def _cli_entries(global_args: list[str]) -> list[dict[str, Any]]:
                 "id": str(item["id"]),
                 "kind": "cli",
                 "category": "cli",
+                "name": str(item["name"]),
+                "description": str(item["description"]),
+                "command": _command_text(argv),
+                "generic": _command_text(argv),
+                "invoke": "",
+                "command_shell": _shell_commands(argv),
+                "generic_shell": _shell_commands(argv),
+                "invoke_shell": {"posix": "", "powershell": "", "cmd": ""},
+                "argv": argv,
+                "generic_argv": list(argv),
+                "invoke_argv": [],
+                "required_env": _required_env(argv),
+                "requires_token": _requires_token(argv),
+                "requires_access_token": _requires_access_token(argv),
+            }
+        )
+    return entries
+
+
+def _wechat_entries(global_args: list[str]) -> list[dict[str, Any]]:
+    entries = []
+    for item in WECHAT_COMMANDS:
+        argv = _command_argv(str(item["command"]), global_args)
+        entries.append(
+            {
+                "id": str(item["id"]),
+                "kind": "wechat_local",
+                "category": "wechat",
                 "name": str(item["name"]),
                 "description": str(item["description"]),
                 "command": _command_text(argv),

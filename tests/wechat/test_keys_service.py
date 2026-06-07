@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import types
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -46,6 +47,98 @@ class DetectPlatformPathsTest(unittest.TestCase):
                     info = keys_svc.detect_platform_paths()
         self.assertEqual(info["platform"], "darwin")
         self.assertTrue(info["detected_path"].endswith("db_storage"))
+
+    def test_windows_detects_wechat_files_under_userprofile_documents(self):
+        with TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            root = home / "Documents" / "WeChat Files" / "wxid_x" / "db_storage"
+            root.mkdir(parents=True)
+            with patch.dict("os.environ", {"USERPROFILE": str(home)}, clear=True):
+                with patch("platform.system", return_value="Windows"):
+                    info = keys_svc.detect_platform_paths()
+        self.assertEqual(info["platform"], "windows")
+        self.assertEqual(info["detected_path"], str(root))
+
+    def test_windows_keeps_searching_when_first_existing_candidate_has_no_db_storage(self):
+        with TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            (home / "Documents" / "WeChat Files").mkdir(parents=True)
+            root = home / "AppData" / "Roaming" / "Tencent" / "WeChat" / "WeChat Files" / "wxid_x" / "db_storage"
+            root.mkdir(parents=True)
+            with patch.dict("os.environ", {"USERPROFILE": str(home)}, clear=True):
+                with patch("platform.system", return_value="Windows"):
+                    info = keys_svc.detect_platform_paths()
+        self.assertEqual(info["detected_path"], str(root))
+
+    def test_windows_detects_custom_wechat_files_path_from_registry(self):
+        with TemporaryDirectory() as tmp:
+            home = Path(tmp) / "User"
+            custom = Path(tmp) / "CustomWeChatData"
+            home.mkdir()
+            root = custom / "WeChat Files" / "wxid_custom" / "db_storage"
+            root.mkdir(parents=True)
+
+            def open_key(root_key: str, subkey: str) -> str:
+                if root_key == "HKCU" and subkey == r"Software\Tencent\WeChat":
+                    return subkey
+                raise FileNotFoundError(subkey)
+
+            def query_value_ex(_key: str, value_name: str) -> tuple[str, int]:
+                if value_name == "FileSavePath":
+                    return "%WECHAT_CUSTOM_ROOT%", 1
+                raise FileNotFoundError(value_name)
+
+            fake_winreg = types.SimpleNamespace(
+                HKEY_CURRENT_USER="HKCU",
+                HKEY_LOCAL_MACHINE="HKLM",
+                OpenKey=open_key,
+                QueryValueEx=query_value_ex,
+                CloseKey=lambda _key: None,
+            )
+            env = {
+                "USERPROFILE": str(home),
+                "WECHAT_CUSTOM_ROOT": str(custom),
+            }
+            with patch.dict("os.environ", env, clear=True):
+                with patch.dict("sys.modules", {"winreg": fake_winreg}):
+                    with patch("platform.system", return_value="Windows"):
+                        info = keys_svc.detect_platform_paths()
+        self.assertEqual(info["detected_path"], str(root))
+
+    def test_windows_detects_wechat_files_under_redirected_documents_registry(self):
+        with TemporaryDirectory() as tmp:
+            home = Path(tmp) / "User"
+            redirected_docs = Path(tmp) / "RedirectedDocuments"
+            home.mkdir()
+            root = redirected_docs / "WeChat Files" / "wxid_docs" / "db_storage"
+            root.mkdir(parents=True)
+
+            def open_key(root_key: str, subkey: str) -> str:
+                if root_key == "HKCU" and subkey == r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders":
+                    return subkey
+                raise FileNotFoundError(subkey)
+
+            def query_value_ex(_key: str, value_name: str) -> tuple[str, int]:
+                if value_name == "Personal":
+                    return "%REDIRECTED_DOCS%", 1
+                raise FileNotFoundError(value_name)
+
+            fake_winreg = types.SimpleNamespace(
+                HKEY_CURRENT_USER="HKCU",
+                HKEY_LOCAL_MACHINE="HKLM",
+                OpenKey=open_key,
+                QueryValueEx=query_value_ex,
+                CloseKey=lambda _key: None,
+            )
+            env = {
+                "USERPROFILE": str(home),
+                "REDIRECTED_DOCS": str(redirected_docs),
+            }
+            with patch.dict("os.environ", env, clear=True):
+                with patch.dict("sys.modules", {"winreg": fake_winreg}):
+                    with patch("platform.system", return_value="Windows"):
+                        info = keys_svc.detect_platform_paths()
+        self.assertEqual(info["detected_path"], str(root))
 
     def test_unsupported_platform(self):
         with TemporaryDirectory() as tmp:

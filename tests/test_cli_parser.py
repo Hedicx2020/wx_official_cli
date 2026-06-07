@@ -103,6 +103,23 @@ class CliParserTest(unittest.TestCase):
         self.assertEqual(output["category"], "cli")
         self.assertIn("cli:profile:set", {entry["id"] for entry in output["entries"]})
 
+    def test_manifest_wechat_category_keeps_local_commands_without_source_or_sidecar(self):
+        parser = build_parser()
+        args = parser.parse_args(["manifest", "--category", "wechat"])
+
+        with (
+            patch("gh_ui_cli.cli._coverage_audit", side_effect=RuntimeError("source unavailable")),
+            patch("gh_ui_cli.cli._http_coverage_audit", side_effect=AssertionError("sidecar should not load")),
+            redirect_stdout(StringIO()) as stdout,
+        ):
+            args.func(args)
+
+        output = json.loads(stdout.getvalue())
+        ids = {entry["id"] for entry in output["entries"]}
+        self.assertEqual(output["category"], "wechat")
+        self.assertIn("wechat:articles-cache-export", ids)
+        self.assertIn("wechat:articles-cache-verify", ids)
+
     def test_deps_uses_explicit_requirements_without_source_import(self):
         parser = build_parser()
         args = parser.parse_args(["deps", "--requirements", "/tmp/requirements.txt"])

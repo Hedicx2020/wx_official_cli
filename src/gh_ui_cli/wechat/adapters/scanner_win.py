@@ -29,6 +29,7 @@ MEM_COMMIT = 0x1000
 READABLE_PROTECTS = {0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80}
 # 进程访问权限: PROCESS_VM_READ | PROCESS_QUERY_INFORMATION
 PROC_ACCESS = 0x0010 | 0x0400
+WECHAT_PROCESS_NAMES = ("Weixin.exe", "WeChat.exe")
 
 
 def _kernel32():
@@ -54,21 +55,26 @@ class _MBI(ctypes.Structure if ctypes else object):  # type: ignore[misc]
 
 def _list_weixin_pids() -> list[tuple[int, int]]:
     """返回 [(pid, mem_kb), ...] 按内存降序排列."""
-    out = subprocess.run(
-        ["tasklist", "/FI", "IMAGENAME eq Weixin.exe", "/FO", "CSV", "/NH"],
-        capture_output=True, text=True, timeout=15,
-    )
     pids: list[tuple[int, int]] = []
-    for line in (out.stdout or "").strip().splitlines():
-        cells = line.strip('"').split('","')
-        if len(cells) < 5:
-            continue
-        try:
-            pid = int(cells[1])
-            mem_kb = int(cells[4].replace(",", "").replace(" K", "").strip() or "0")
-        except ValueError:
-            continue
-        pids.append((pid, mem_kb))
+    seen: set[int] = set()
+    for process_name in WECHAT_PROCESS_NAMES:
+        out = subprocess.run(
+            ["tasklist", "/FI", f"IMAGENAME eq {process_name}", "/FO", "CSV", "/NH"],
+            capture_output=True, text=True, timeout=15,
+        )
+        for line in (out.stdout or "").strip().splitlines():
+            cells = line.strip('"').split('","')
+            if len(cells) < 5:
+                continue
+            try:
+                pid = int(cells[1])
+                mem_kb = int(cells[4].replace(",", "").replace(" K", "").strip() or "0")
+            except ValueError:
+                continue
+            if pid in seen:
+                continue
+            seen.add(pid)
+            pids.append((pid, mem_kb))
     pids.sort(key=lambda x: x[1], reverse=True)
     return pids
 
@@ -106,7 +112,7 @@ def _enum_regions(h) -> list[tuple[int, int]]:
 
 
 def extract_keys(db_dir: str, on_log=None) -> dict[str, str]:
-    """扫所有 Weixin.exe 内存, 返回 salt_hex -> enc_key_hex.
+    """扫所有 Weixin.exe / WeChat.exe 内存, 返回 salt_hex -> enc_key_hex.
 
     Raises:
         RuntimeError: 非 Windows 调用 / 微信未运行 / 全部进程都打不开.
@@ -121,9 +127,9 @@ def extract_keys(db_dir: str, on_log=None) -> dict[str, str]:
 
     pids = _list_weixin_pids()
     if not pids:
-        raise RuntimeError("Weixin.exe 未运行, 请先打开并登录微信")
+        raise RuntimeError("Weixin.exe / WeChat.exe 未运行, 请先打开并登录微信")
 
-    log(f"找到 {len(db_files)} 个数据库, {len(salt_map)} 个 salt; {len(pids)} 个 Weixin.exe 进程")
+    log(f"找到 {len(db_files)} 个数据库, {len(salt_map)} 个 salt; {len(pids)} 个微信进程")
 
     key_map: dict[str, str] = {}
     remaining = set(salt_map.keys())

@@ -182,7 +182,12 @@ def handle_manifest(args: argparse.Namespace) -> None:
     if args.category == "cli":
         audit = {"routes": {"operations": []}, "data_capabilities": {}, "factor_data_capabilities": []}
     else:
-        audit = _http_coverage_audit(config) if config.api_base else _coverage_audit(config)
+        try:
+            audit = _http_coverage_audit(config) if config.api_base else _coverage_audit(config)
+        except Exception:
+            if args.category != "wechat":
+                raise
+            audit = {"routes": {"operations": []}, "data_capabilities": {}, "factor_data_capabilities": []}
     manifest = build_agent_manifest(audit, category=args.category, global_args=_manifest_global_args(config))
     write_json(manifest, save=args.save)
 
@@ -1716,6 +1721,38 @@ def handle_wechat_purge_invalid(args: argparse.Namespace) -> None:
     )
 
 
+def handle_wechat_articles_cache_export(args: argparse.Namespace) -> None:
+    from .wechat.services.articles import sync as sync_svc
+
+    write_json(
+        sync_svc.export_cached_by_account(
+            args.account_name,
+            limit=args.limit,
+            output_dir=args.output_dir or None,
+            scan_first=not args.no_scan,
+            auto_password=not args.no_auto_password,
+            fetch_html=not args.no_fetch_html,
+        ),
+        save=args.save,
+    )
+
+
+def handle_wechat_articles_cache_verify(args: argparse.Namespace) -> None:
+    from .wechat.services.articles import sync as sync_svc
+
+    report = sync_svc.verify_cache_export(
+        args.account_name,
+        limit=args.limit,
+        output_dir=args.output_dir or None,
+        scan_first=not args.no_scan,
+        auto_password=not args.no_auto_password,
+        fetch_html=not args.no_fetch_html,
+    )
+    write_json(report, save=args.save)
+    if args.strict and not report.get("ok"):
+        raise SystemExit(1)
+
+
 def handle_wechat_request(args: argparse.Namespace) -> None:
     handle_api_request(args, prefix="/api/wechat")
 
@@ -2284,6 +2321,41 @@ def add_wechat_commands(sub: argparse._SubParsersAction) -> None:
     preview.add_argument("--sample", type=int, default=None)
     add_save(preview)
     preview.set_defaults(func=handle_wechat_sync_by_category_preview)
+
+    cache_export = ws.add_parser(
+        "articles-cache-export",
+        help="scan local WeChat cache and export articles for one account",
+    )
+    cache_export.add_argument("account_name", help="公众号名字或 mp_id")
+    cache_export.add_argument("--limit", type=int, default=100)
+    cache_export.add_argument("--output-dir", default="")
+    cache_export.add_argument("--no-scan", action="store_true", help="skip cache scan and export existing store only")
+    cache_export.add_argument("--no-fetch-html", action="store_true", help="do not fetch full article HTML from cached mp.weixin URLs")
+    cache_export.add_argument(
+        "--no-auto-password",
+        action="store_true",
+        help="do not run password-auto when decrypted cache is not ready",
+    )
+    add_save(cache_export)
+    cache_export.set_defaults(func=handle_wechat_articles_cache_export)
+
+    cache_verify = ws.add_parser(
+        "articles-cache-verify",
+        help="run cache export and emit a goal verification report",
+    )
+    cache_verify.add_argument("account_name", help="公众号名字或 mp_id")
+    cache_verify.add_argument("--limit", type=int, default=100)
+    cache_verify.add_argument("--output-dir", default="")
+    cache_verify.add_argument("--no-scan", action="store_true", help="skip cache scan and verify existing store only")
+    cache_verify.add_argument("--no-fetch-html", action="store_true", help="do not fetch full article HTML from cached mp.weixin URLs")
+    cache_verify.add_argument(
+        "--no-auto-password",
+        action="store_true",
+        help="do not run password-auto when decrypted cache is not ready",
+    )
+    cache_verify.add_argument("--strict", action="store_true", help="exit 1 when goal requirements are not met")
+    add_save(cache_verify)
+    cache_verify.set_defaults(func=handle_wechat_articles_cache_verify)
 
 
 def add_prefixed_request_group(sub: argparse._SubParsersAction, name: str, prefix: str, help_text: str) -> None:
