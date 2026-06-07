@@ -124,6 +124,8 @@ class WxOfficialCliTest(unittest.TestCase):
     def test_pyproject_points_console_script_to_simplified_entry(self):
         pyproject = Path("pyproject.toml").read_text(encoding="utf-8")
 
+        self.assertIn('name = "wx-official-cli"', pyproject)
+        self.assertNotIn('gh-ui = "gh_ui_cli.cli:main"', pyproject)
         self.assertIn(
             'wx-official-cli = "gh_ui_cli.wx_official_cli:main"',
             pyproject,

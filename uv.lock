@@ -737,74 +737,6 @@ wheels = [
 ]
 
 [[package]]
-name = "gh-ui-cli"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "fastapi" },
-    { name = "httpx" },
-    { name = "pycryptodome" },
-    { name = "uvicorn" },
-]
-
-[package.optional-dependencies]
-full = [
-    { name = "akshare" },
-    { name = "beautifulsoup4" },
-    { name = "cryptography" },
-    { name = "ddddocr" },
-    { name = "fpdf2" },
-    { name = "lxml" },
-    { name = "matplotlib" },
-    { name = "onnxruntime", version = "1.23.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "openpyxl" },
-    { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "pandas", version = "3.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "pyarrow" },
-    { name = "pycryptodome" },
-    { name = "pyecharts" },
-    { name = "pymem", marker = "sys_platform == 'win32'" },
-    { name = "pymysql" },
-    { name = "python-multipart" },
-    { name = "requests" },
-    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "sqlalchemy" },
-    { name = "tqdm" },
-    { name = "zstandard" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "akshare", marker = "extra == 'full'", specifier = ">=1.13" },
-    { name = "beautifulsoup4", marker = "extra == 'full'", specifier = ">=4.12" },
-    { name = "cryptography", marker = "extra == 'full'", specifier = ">=42.0" },
-    { name = "ddddocr", marker = "extra == 'full'", specifier = ">=1.5" },
-    { name = "fastapi", specifier = ">=0.115" },
-    { name = "fpdf2", marker = "extra == 'full'", specifier = ">=2.7" },
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "lxml", marker = "extra == 'full'", specifier = ">=5.0" },
-    { name = "matplotlib", marker = "extra == 'full'", specifier = ">=3.8" },
-    { name = "onnxruntime", marker = "python_full_version < '3.11' and extra == 'full'", specifier = "<1.24" },
-    { name = "openpyxl", marker = "extra == 'full'", specifier = ">=3.1" },
-    { name = "pandas", marker = "extra == 'full'", specifier = ">=2.0" },
-    { name = "pyarrow", marker = "extra == 'full'", specifier = ">=15.0" },
-    { name = "pycryptodome", specifier = ">=3.19" },
-    { name = "pycryptodome", marker = "extra == 'full'", specifier = ">=3.19" },
-    { name = "pyecharts", marker = "extra == 'full'", specifier = ">=2.0" },
-    { name = "pymem", marker = "sys_platform == 'win32' and extra == 'full'", specifier = ">=1.13" },
-    { name = "pymysql", marker = "extra == 'full'", specifier = ">=1.1" },
-    { name = "python-multipart", marker = "extra == 'full'", specifier = ">=0.0.7" },
-    { name = "requests", marker = "extra == 'full'", specifier = ">=2.31" },
-    { name = "scipy", marker = "extra == 'full'", specifier = ">=1.11" },
-    { name = "sqlalchemy", marker = "extra == 'full'", specifier = ">=2.0" },
-    { name = "tqdm", marker = "extra == 'full'", specifier = ">=4.66" },
-    { name = "uvicorn", specifier = ">=0.34" },
-    { name = "zstandard", marker = "extra == 'full'", specifier = ">=0.22" },
-]
-provides-extras = ["full"]
-
-[[package]]
 name = "greenlet"
 version = "3.5.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2712,6 +2644,74 @@ sdist = { url = "https://files.pythonhosted.org/packages/0b/02/ae6ceac1baeda5308
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f4/24/2a3e3df732393fed8b3ebf2ec078f05546de641fe1b667ee316ec1dcf3b7/webencodings-0.5.1-py2.py3-none-any.whl", hash = "sha256:a0af1213f3c2226497a97e2b3aa01a7e4bee4f403f95be16fc9acd2947514a78", size = 11774, upload-time = "2017-04-05T20:21:32.581Z" },
 ]
+
+[[package]]
+name = "wx-official-cli"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "fastapi" },
+    { name = "httpx" },
+    { name = "pycryptodome" },
+    { name = "uvicorn" },
+]
+
+[package.optional-dependencies]
+full = [
+    { name = "akshare" },
+    { name = "beautifulsoup4" },
+    { name = "cryptography" },
+    { name = "ddddocr" },
+    { name = "fpdf2" },
+    { name = "lxml" },
+    { name = "matplotlib" },
+    { name = "onnxruntime", version = "1.23.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "openpyxl" },
+    { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "pandas", version = "3.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "pyarrow" },
+    { name = "pycryptodome" },
+    { name = "pyecharts" },
+    { name = "pymem", marker = "sys_platform == 'win32'" },
+    { name = "pymysql" },
+    { name = "python-multipart" },
+    { name = "requests" },
+    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "sqlalchemy" },
+    { name = "tqdm" },
+    { name = "zstandard" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "akshare", marker = "extra == 'full'", specifier = ">=1.13" },
+    { name = "beautifulsoup4", marker = "extra == 'full'", specifier = ">=4.12" },
+    { name = "cryptography", marker = "extra == 'full'", specifier = ">=42.0" },
+    { name = "ddddocr", marker = "extra == 'full'", specifier = ">=1.5" },
+    { name = "fastapi", specifier = ">=0.115" },
+    { name = "fpdf2", marker = "extra == 'full'", specifier = ">=2.7" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "lxml", marker = "extra == 'full'", specifier = ">=5.0" },
+    { name = "matplotlib", marker = "extra == 'full'", specifier = ">=3.8" },
+    { name = "onnxruntime", marker = "python_full_version < '3.11' and extra == 'full'", specifier = "<1.24" },
+    { name = "openpyxl", marker = "extra == 'full'", specifier = ">=3.1" },
+    { name = "pandas", marker = "extra == 'full'", specifier = ">=2.0" },
+    { name = "pyarrow", marker = "extra == 'full'", specifier = ">=15.0" },
+    { name = "pycryptodome", specifier = ">=3.19" },
+    { name = "pycryptodome", marker = "extra == 'full'", specifier = ">=3.19" },
+    { name = "pyecharts", marker = "extra == 'full'", specifier = ">=2.0" },
+    { name = "pymem", marker = "sys_platform == 'win32' and extra == 'full'", specifier = ">=1.13" },
+    { name = "pymysql", marker = "extra == 'full'", specifier = ">=1.1" },
+    { name = "python-multipart", marker = "extra == 'full'", specifier = ">=0.0.7" },
+    { name = "requests", marker = "extra == 'full'", specifier = ">=2.31" },
+    { name = "scipy", marker = "extra == 'full'", specifier = ">=1.11" },
+    { name = "sqlalchemy", marker = "extra == 'full'", specifier = ">=2.0" },
+    { name = "tqdm", marker = "extra == 'full'", specifier = ">=4.66" },
+    { name = "uvicorn", specifier = ">=0.34" },
+    { name = "zstandard", marker = "extra == 'full'", specifier = ">=0.22" },
+]
+provides-extras = ["full"]
 
 [[package]]
 name = "xlrd"
