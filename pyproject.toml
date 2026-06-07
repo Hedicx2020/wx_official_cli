@@ -25,6 +25,7 @@ full = [
   "pycryptodome>=3.19",
   "zstandard>=0.22",
   "ddddocr>=1.5",
+  "onnxruntime<1.24; python_version < '3.11'",
   "tqdm>=4.66",
   "akshare>=1.13",
   "pyecharts>=2.0",

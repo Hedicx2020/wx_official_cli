@@ -5,6 +5,8 @@ from unittest.mock import patch
 
 from gh_ui_cli.dependencies import build_dependency_report, parse_requirement_line
 
+ROOT = Path(__file__).resolve().parents[1]
+
 
 class DependenciesTest(unittest.TestCase):
     def test_parse_requirement_line_keeps_name_spec_and_marker(self):
@@ -51,6 +53,11 @@ class DependenciesTest(unittest.TestCase):
 
         self.assertEqual([item["name"] for item in report["missing"]], ["pymem"])
         self.assertEqual(report["skipped"], [])
+
+    def test_full_extra_keeps_onnxruntime_installable_on_python_310(self):
+        pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+
+        self.assertIn('"onnxruntime<1.24; python_version < \'3.11\'"', pyproject)
 
 
 if __name__ == "__main__":
