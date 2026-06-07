@@ -162,7 +162,7 @@ class VerifyReportTest(unittest.TestCase):
         self.assertFalse(report["goal_evidence"]["preferred_commands_parseable"])
         self.assertFalse(report["goal_evidence"]["all_features_cli_callable"])
 
-    def test_merge_reports_marks_completion_ready_when_mac_and_windows_evidence_exist(self):
+    def test_merge_reports_keeps_completion_false_without_windows_wechat_cache_export(self):
         mac_source = _report(
             platform="macOS",
             current_platform="darwin",
@@ -196,10 +196,11 @@ class VerifyReportTest(unittest.TestCase):
         merged = merge_goal_verification_reports([mac_source, windows_http])
 
         self.assertTrue(merged["ok"])
-        self.assertTrue(merged["completion_ready"])
+        self.assertFalse(merged["completion_ready"])
         self.assertTrue(merged["goal_evidence"]["all_features_cli_callable"])
         self.assertTrue(merged["goal_evidence"]["mac_runtime_verified"])
         self.assertTrue(merged["goal_evidence"]["windows_runtime_verified"])
+        self.assertFalse(merged["goal_evidence"]["wechat_cache_verified"])
         self.assertEqual(merged["failed_reports"], [])
         self.assertEqual(
             merged["evidence_sources"]["all_features_cli_callable"],
@@ -215,7 +216,19 @@ class VerifyReportTest(unittest.TestCase):
         self.assertTrue(requirements["agent_profile"]["ok"])
         self.assertTrue(requirements["mac_runtime"]["ok"])
         self.assertTrue(requirements["windows_runtime"]["ok"])
-        self.assertEqual(merged["next_actions"], {})
+        self.assertFalse(requirements["wechat_cache_export"]["ok"])
+        self.assertEqual(
+            merged["next_actions"]["wechat_cache_export"][0]["argv"],
+            [
+                "gh-ui",
+                "wechat",
+                "articles-cache-verify",
+                "<ACCOUNT_NAME>",
+                "--strict",
+                "--save",
+                "verify-wechat-cache-windows.json",
+            ],
+        )
         self.assertEqual(
             requirements["source_cli_coverage"]["evidence_sources"],
             {
@@ -233,6 +246,57 @@ class VerifyReportTest(unittest.TestCase):
                 ],
             },
         )
+
+    def test_merge_reports_marks_completion_ready_when_windows_wechat_cache_export_exists(self):
+        mac_source = _report(
+            platform="macOS",
+            current_platform="darwin",
+            evidence={
+                "route_operations_callable": True,
+                "source_dynamic_capabilities_verified": True,
+                "frontend_api_references_verified": True,
+                "preferred_commands_parseable": True,
+                "all_features_cli_callable": True,
+                "agent_profile_verified": True,
+                "mac_runtime_verified": True,
+                "windows_dependency_preflight": True,
+            },
+        )
+        windows_http = _report(
+            platform="Windows",
+            current_platform="win32",
+            mode="api_base",
+            evidence={
+                "agent_profile_verified": True,
+                "windows_runtime_verified": True,
+            },
+        )
+        wechat_cache = _wechat_cache_report(platform="windows")
+
+        merged = merge_goal_verification_reports([mac_source, windows_http, wechat_cache])
+
+        self.assertTrue(merged["completion_ready"])
+        self.assertTrue(merged["goal_evidence"]["wechat_cache_verified"])
+        self.assertEqual(
+            merged["evidence_sources"]["wechat_cache_verified"],
+            [{"index": 2, "platform": "windows", "current_platform": "windows", "mode": "wechat_cache"}],
+        )
+        self.assertTrue(merged["completion_requirements"]["wechat_cache_export"]["ok"])
+        self.assertEqual(merged["next_actions"], {})
+
+    def test_merge_reports_ignores_wechat_cache_evidence_from_non_windows_report(self):
+        mac_claim = _report(
+            platform="macOS",
+            current_platform="darwin",
+            evidence={"wechat_cache_verified": True},
+        )
+        direct_mac_report = _wechat_cache_report(platform="darwin")
+
+        merged = merge_goal_verification_reports([mac_claim, direct_mac_report])
+
+        self.assertFalse(merged["goal_evidence"]["wechat_cache_verified"])
+        self.assertFalse(merged["completion_requirements"]["wechat_cache_export"]["ok"])
+        self.assertIn("Windows WeChat cache export has not been verified.", merged["limitations"])
 
     def test_merge_reports_keeps_source_cli_coverage_separate_from_agent_profile(self):
         mac_source = _report(
@@ -280,6 +344,7 @@ class VerifyReportTest(unittest.TestCase):
         self.assertFalse(merged["completion_requirements"]["no_failed_reports"]["ok"])
         self.assertEqual(merged["completion_requirements"]["no_failed_reports"]["failed_report_indices"], [1])
         self.assertFalse(merged["completion_requirements"]["windows_runtime"]["ok"])
+        self.assertFalse(merged["completion_requirements"]["wechat_cache_export"]["ok"])
 
     def test_merge_reports_ignores_windows_runtime_evidence_from_non_windows_report(self):
         mac_source = _report(
@@ -346,6 +411,7 @@ def _report(*, platform, current_platform, evidence, ok=True, mode="source"):
         "mac_runtime_verified": False,
         "windows_runtime_verified": False,
         "windows_dependency_preflight": False,
+        "wechat_cache_verified": False,
     }
     return {
         "ok": ok,
@@ -357,6 +423,22 @@ def _report(*, platform, current_platform, evidence, ok=True, mode="source"):
         "goal_evidence": {**defaults, **evidence},
         "limitations": [],
         "checks": [],
+    }
+
+
+def _wechat_cache_report(*, platform="windows", ok=True, requirements_ok=True):
+    requirement = {"ok": requirements_ok}
+    return {
+        "ok": ok,
+        "account_name": "Alpha研究",
+        "requirements": {
+            "wechat_path_detected": requirement,
+            "database_key_available": requirement,
+            "articles_exported": requirement,
+            "html_files_written": requirement,
+        },
+        "password_status": {"platform": platform},
+        "export": {"article_count": 3, "html_count": 3},
     }
 
 

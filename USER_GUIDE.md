@@ -340,10 +340,10 @@ uv run gh-ui wechat articles-cache-verify "公众号名字" --strict --save veri
 
 `verify-wechat-cache-windows.json` 中 `ok` 为 `true`，并且 `requirements.wechat_path_detected`、`requirements.database_key_available`、`requirements.articles_exported`、`requirements.html_files_written` 都为 `true`，才说明真实 Windows 微信缓存链路跑通。如果 `ok` 为 `false`，先看 `error` 和 `next_actions` 判断是路径、`Weixin.exe` / `WeChat.exe` 进程权限、数据库 key、公众号缓存，还是输出目录写入问题。
 
-然后合并 macOS 和 Windows 报告：
+然后合并 macOS source、Windows runtime 和 Windows 微信缓存报告：
 
 ```bash
-uv run gh-ui verify-merge verify-macos.json verify-windows.json --strict-goal
+uv run gh-ui verify-merge verify-macos.json verify-windows.json verify-wechat-cache-windows.json --strict-goal
 ```
 
 ## 推荐日常流程

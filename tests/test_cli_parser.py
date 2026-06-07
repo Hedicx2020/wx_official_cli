@@ -238,6 +238,7 @@ class CliParserTest(unittest.TestCase):
 
         output = json.loads(stdout.getvalue())
         self.assertFalse(output["completion_claimable_without_windows_runtime"])
+        self.assertFalse(output["completion_claimable_without_windows_wechat_cache"])
         self.assertEqual(
             output["commands"]["macos_source_report"]["argv"],
             [
@@ -255,12 +256,38 @@ class CliParserTest(unittest.TestCase):
             ["gh-ui", "runtime-verify", "win.json"],
         )
         self.assertEqual(
+            output["commands"]["windows_wechat_cache_report"]["argv"],
+            [
+                "gh-ui",
+                "wechat",
+                "articles-cache-verify",
+                "<ACCOUNT_NAME>",
+                "--strict",
+                "--save",
+                "verify-wechat-cache-windows.json",
+            ],
+        )
+        self.assertEqual(
             output["commands"]["merge_reports"]["argv"],
-            ["gh-ui", "verify-merge", "mac.json", "win.json", "--strict-goal"],
+            [
+                "gh-ui",
+                "verify-merge",
+                "mac.json",
+                "win.json",
+                "verify-wechat-cache-windows.json",
+                "--strict-goal",
+            ],
         )
         self.assertEqual(
             output["commands"]["merge_artifacts"]["argv"],
-            ["gh-ui", "verify-merge", "mac.json", "artifacts", "--strict-goal"],
+            [
+                "gh-ui",
+                "verify-merge",
+                "mac.json",
+                "artifacts",
+                "verify-wechat-cache-windows.json",
+                "--strict-goal",
+            ],
         )
         self.assertEqual(
             output["commands"]["macos_verification_bundle"]["argv"],
@@ -306,6 +333,7 @@ class CliParserTest(unittest.TestCase):
             ],
         )
         self.assertIn("windows_runtime", output["completion_requirements"])
+        self.assertIn("wechat_cache_export", output["completion_requirements"])
 
     def test_ci_status_reports_missing_workflow_and_next_commands(self):
         parser = build_parser()
@@ -357,7 +385,14 @@ class CliParserTest(unittest.TestCase):
         )
         self.assertEqual(
             output["commands"]["merge_artifacts"]["argv"],
-            ["gh-ui", "verify-merge", "mac.json", "artifacts", "--strict-goal"],
+            [
+                "gh-ui",
+                "verify-merge",
+                "mac.json",
+                "artifacts",
+                "verify-wechat-cache-windows.json",
+                "--strict-goal",
+            ],
         )
         self.assertEqual(output["next_actions"][0]["kind"], "publish_workflow")
         run_gh.assert_called_once_with(["api", "repos/Hedicx2020/ghfe_web/actions/workflows"])
@@ -551,15 +586,31 @@ class CliParserTest(unittest.TestCase):
 
             self.assertEqual(source_report["ok"], True)
             self.assertEqual(plan["commands"]["windows_runtime_report"]["argv"], ["gh-ui", "runtime-verify", "verify-windows.json"])
+            self.assertEqual(
+                plan["commands"]["windows_wechat_cache_report"]["argv"],
+                [
+                    "gh-ui",
+                    "wechat",
+                    "articles-cache-verify",
+                    "<ACCOUNT_NAME>",
+                    "--strict",
+                    "--save",
+                    "verify-wechat-cache-windows.json",
+                ],
+            )
             self.assertEqual(manifest["entries"][0]["id"], "cli:verify-plan")
             self.assertIn("gh-ui ci-status", readme)
             self.assertIn("gh-ui ci-log-report", readme)
             self.assertIn("gh-ui runtime-verify verify-windows.json", readme)
-            self.assertIn("gh-ui verify-merge verify-source.json verify-windows.json --strict-goal", readme)
+            self.assertIn(
+                "gh-ui verify-merge verify-source.json verify-windows.json "
+                "verify-wechat-cache-windows.json --strict-goal",
+                readme,
+            )
 
     def test_verify_merge_reads_report_files_and_reports_completion(self):
         parser = build_parser()
-        args = parser.parse_args(["verify-merge", "@mac.json", "@windows.json"])
+        args = parser.parse_args(["verify-merge", "@mac.json", "@windows.json", "@cache.json"])
         reports = [
             {
                 "ok": True,
@@ -590,6 +641,18 @@ class CliParserTest(unittest.TestCase):
                     "mac_runtime_verified": False,
                     "windows_runtime_verified": True,
                 },
+            },
+            {
+                "ok": True,
+                "account_name": "Alpha研究",
+                "requirements": {
+                    "wechat_path_detected": {"ok": True},
+                    "database_key_available": {"ok": True},
+                    "articles_exported": {"ok": True},
+                    "html_files_written": {"ok": True},
+                },
+                "password_status": {"platform": "windows"},
+                "export": {"article_count": 3, "html_files": ["a.html", "b.html", "c.html"]},
             },
         ]
 
@@ -650,7 +713,7 @@ class CliParserTest(unittest.TestCase):
             with redirect_stdout(StringIO()) as stdout:
                 handle_verify_merge(args)
 
-        self.assertIn('"completion_ready": true', stdout.getvalue())
+        self.assertIn('"completion_ready": false', stdout.getvalue())
 
     def test_verify_merge_expands_report_directories(self):
         parser = build_parser()
@@ -705,7 +768,7 @@ class CliParserTest(unittest.TestCase):
 
         output = json.loads(stdout.getvalue())
         self.assertEqual(output["input_count"], 2)
-        self.assertTrue(output["completion_ready"])
+        self.assertFalse(output["completion_ready"])
 
     def test_invoke_route_id_calls_api_client_with_replaced_path(self):
         parser = build_parser()

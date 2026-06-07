@@ -15,6 +15,7 @@ EVIDENCE_KEYS = (
     "mac_runtime_verified",
     "windows_runtime_verified",
     "windows_dependency_preflight",
+    "wechat_cache_verified",
 )
 
 SOURCE_CLI_COVERAGE_KEYS = (
@@ -53,6 +54,7 @@ def build_goal_verification_report(
     mac_runtime_verified = runtime_verified and current_platform == "darwin"
     windows_runtime_verified = runtime_verified and current_platform == "win32"
     windows_dependency_preflight = bool(windows_preflight.get("ok") and not windows_preflight.get("skipped"))
+    wechat_cache_verified = False
 
     limitations = []
     if not windows_runtime_verified:
@@ -63,12 +65,14 @@ def build_goal_verification_report(
         limitations.append("HTTP mode cannot verify source dynamic capability inventory.")
     if not agent_profile_verified:
         limitations.append("Agent profile smoke has not been verified in this run.")
+    limitations.append("Windows WeChat cache export has not been verified in this run.")
 
     completion_ready = (
         not failed_checks
         and all_features_cli_callable
         and mac_runtime_verified
         and windows_runtime_verified
+        and wechat_cache_verified
     )
 
     return {
@@ -88,6 +92,7 @@ def build_goal_verification_report(
             "mac_runtime_verified": mac_runtime_verified,
             "windows_runtime_verified": windows_runtime_verified,
             "windows_dependency_preflight": windows_dependency_preflight,
+            "wechat_cache_verified": wechat_cache_verified,
         },
         "limitations": limitations,
         "checks": checks,
@@ -159,6 +164,10 @@ def _completion_requirements(
             "ok": bool(evidence_sources["windows_runtime_verified"]),
             "evidence_sources": evidence_sources["windows_runtime_verified"],
         },
+        "wechat_cache_export": {
+            "ok": bool(evidence_sources["wechat_cache_verified"]),
+            "evidence_sources": evidence_sources["wechat_cache_verified"],
+        },
     }
 
 
@@ -183,6 +192,7 @@ def _next_actions(completion_requirements: dict[str, dict[str, Any]]) -> dict[st
         "agent_profile": ["macos_source_report", "windows_runtime_report"],
         "mac_runtime": ["macos_source_report"],
         "windows_runtime": ["windows_runtime_report", "windows_http_sidecar_report", "download_windows_ci_artifact"],
+        "wechat_cache_export": ["windows_wechat_cache_report"],
     }
     return {
         requirement_name: [
@@ -198,20 +208,28 @@ def _next_actions(completion_requirements: dict[str, dict[str, Any]]) -> dict[st
 
 def _report_evidence_sources(reports: list[dict[str, Any]], key: str) -> list[dict[str, Any]]:
     return [
-        {
-            "index": index,
-            "platform": str(report.get("platform", "")),
-            "current_platform": str(report.get("current_platform", "")),
-            "mode": str(report.get("mode", "")),
-        }
+        _report_evidence_source(report, index, key)
         for index, report in enumerate(reports)
         if _valid_report_evidence(report, key)
     ]
 
 
+def _report_evidence_source(report: dict[str, Any], index: int, key: str) -> dict[str, Any]:
+    platform_value = _wechat_cache_report_platform(report) if key == "wechat_cache_verified" else ""
+    mode_value = "wechat_cache" if key == "wechat_cache_verified" and _direct_wechat_cache_requirements_ok(report) else ""
+    return {
+        "index": index,
+        "platform": str(report.get("platform", "") or platform_value),
+        "current_platform": str(report.get("current_platform", "") or platform_value),
+        "mode": str(report.get("mode", "") or mode_value),
+    }
+
+
 def _valid_report_evidence(report: dict[str, Any], key: str) -> bool:
     if not report.get("ok"):
         return False
+    if key == "wechat_cache_verified":
+        return _wechat_cache_report_verified(report)
     evidence = report.get("goal_evidence") or {}
     if not isinstance(evidence, dict) or not evidence.get(key):
         return False
@@ -231,6 +249,42 @@ def _valid_report_evidence(report: dict[str, Any], key: str) -> bool:
     return True
 
 
+def _wechat_cache_report_verified(report: dict[str, Any]) -> bool:
+    evidence = report.get("goal_evidence") or {}
+    if isinstance(evidence, dict) and evidence.get("wechat_cache_verified"):
+        return _is_windows_platform(report.get("current_platform"))
+    if not _direct_wechat_cache_requirements_ok(report):
+        return False
+    return _is_windows_platform(_wechat_cache_report_platform(report))
+
+
+def _direct_wechat_cache_requirements_ok(report: dict[str, Any]) -> bool:
+    requirements = report.get("requirements")
+    if not isinstance(requirements, dict):
+        return False
+    required = (
+        "wechat_path_detected",
+        "database_key_available",
+        "articles_exported",
+        "html_files_written",
+    )
+    return all(
+        isinstance(requirements.get(name), dict) and bool(requirements[name].get("ok"))
+        for name in required
+    )
+
+
+def _wechat_cache_report_platform(report: dict[str, Any]) -> str:
+    password_status = report.get("password_status") or {}
+    if not isinstance(password_status, dict):
+        password_status = {}
+    return str(report.get("current_platform") or password_status.get("platform") or report.get("platform") or "")
+
+
+def _is_windows_platform(value: Any) -> bool:
+    return str(value or "").lower() in {"win32", "windows"}
+
+
 def _merged_limitations(
     evidence: dict[str, bool],
     completion_requirements: dict[str, dict[str, Any]],
@@ -244,6 +298,8 @@ def _merged_limitations(
         limitations.append("macOS runtime has not been verified.")
     if not evidence["windows_runtime_verified"]:
         limitations.append("Windows runtime has not been verified.")
+    if not evidence["wechat_cache_verified"]:
+        limitations.append("Windows WeChat cache export has not been verified.")
     return limitations
 
 

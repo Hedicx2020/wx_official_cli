@@ -112,8 +112,8 @@ CLI_COMMANDS = (
     {
         "id": "cli:verify-merge",
         "name": "verify_merge",
-        "description": "Merge macOS and Windows verification reports or artifact directories for final goal evidence.",
-        "command": "gh-ui verify-merge <MAC_VERIFY_JSON> <WINDOWS_VERIFY_JSON_OR_DIR>",
+        "description": "Merge macOS, Windows runtime, and Windows WeChat cache reports for final goal evidence.",
+        "command": "gh-ui verify-merge <MAC_VERIFY_JSON> <WINDOWS_VERIFY_JSON_OR_DIR> <WECHAT_CACHE_VERIFY_JSON>",
     },
 )
 WECHAT_COMMANDS = (

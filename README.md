@@ -168,9 +168,9 @@ uv run gh-ui --api-base http://127.0.0.1:8765 manifest --category wechat
 
 `deps` 是 source 模式的依赖预检入口。它不会导入 `gh_quant_ui`，只解析 `api/requirements.txt` 并报告当前平台适用、已安装、缺失和跳过的依赖；如果缺失 `ddddocr`、`pyarrow`、`scipy` 等重依赖，优先考虑走 `--api-base` 复用已运行 sidecar，或预留时间完成 full install。需要在 macOS 上预检 Windows 依赖时使用 `--platform win32`；需要给 CI 或 agent 自动化做硬门禁时加 `--strict`，存在缺失依赖会返回非零退出码。
 
-`verify` 是面向目标验收的总入口，会汇总依赖、CLI 覆盖和 smoke 结果，并额外输出 `completion_ready` 与 `goal_evidence`。在单台 macOS 机器上即使所有本机检查通过，`completion_ready` 仍会保持 `false`，直到 Windows runtime 也在 Windows 环境完成验证；这避免 agent 把本机通过误判成完整跨平台完成。需要让当前检查失败时返回非零退出码用 `--strict`，需要强制完整目标验收用 `--strict-goal`。`--windows-deps-preflight` 只在 source 模式解析 `api/requirements.txt`；HTTP-only 模式不会强制要求本地 `gh_quant_ui` 源码，会把该项标记为 skipped。
+`verify` 是面向目标验收的总入口，会汇总依赖、CLI 覆盖和 smoke 结果，并额外输出 `completion_ready` 与 `goal_evidence`。在单台 macOS 机器上即使所有本机检查通过，`completion_ready` 仍会保持 `false`，直到 Windows runtime 和真实 Windows 微信缓存导出都完成验证；这避免 agent 把本机通过或 CI mock runtime 误判成完整完成。需要让当前检查失败时返回非零退出码用 `--strict`，需要强制完整目标验收用 `--strict-goal`。`--windows-deps-preflight` 只在 source 模式解析 `api/requirements.txt`；HTTP-only 模式不会强制要求本地 `gh_quant_ui` 源码，会把该项标记为 skipped。
 
-`verify-plan` 会输出机器可读的最终验收计划，不导入 `gh_quant_ui` 源码，也不访问 sidecar。agent 可以先读取它，拿到 source 覆盖、agent profile、macOS runtime、Windows runtime 各自需要的证据和平台命令:
+`verify-plan` 会输出机器可读的最终验收计划，不导入 `gh_quant_ui` 源码，也不访问 sidecar。agent 可以先读取它，拿到 source 覆盖、agent profile、macOS runtime、Windows runtime、Windows 微信缓存导出各自需要的证据和平台命令:
 
 ```bash
 uv run gh-ui verify-plan
@@ -198,17 +198,17 @@ uv run gh-ui ci-log-report <RUN_ID> --repo Hedicx2020/ghfe_web --platform win32 
 
 ```bash
 uv run --extra full gh-ui verify --with-data-query --windows-deps-preflight --strict --save verify-macos.json
-uv run gh-ui verify-merge verify-macos.json verify-windows.json --strict-goal
+uv run gh-ui verify-merge verify-macos.json verify-windows.json verify-wechat-cache-windows.json --strict-goal
 ```
 
 `verify-merge` 也可以直接接收报告目录，会递归读取其中的 `*.json`。这适合 GitHub Actions artifact 下载后的目录结构:
 
 ```bash
 gh run download --name gh-ui-verify-Windows-py3.12 --dir verify-artifacts
-uv run gh-ui verify-merge verify-macos.json verify-artifacts --strict-goal
+uv run gh-ui verify-merge verify-macos.json verify-artifacts verify-wechat-cache-windows.json --strict-goal
 ```
 
-合并时会校验证据来源：`windows_runtime_verified` 只接受 `current_platform=win32` 的报告，`mac_runtime_verified` 只接受 `current_platform=darwin` 的报告，完整功能覆盖只接受 source 模式报告，避免把 HTTP-only 或错误平台报告误当成完整验收。输出里的 `evidence_sources` 会列出每个证据项来自哪个输入报告，`completion_requirements` 会逐项给出最终门禁状态；如果仍未完成，`next_actions` 会按缺失门禁给出可执行的下一步命令，便于 agent 做机器审计和续跑。
+合并时会校验证据来源：`windows_runtime_verified` 只接受 `current_platform=win32` 的报告，`mac_runtime_verified` 只接受 `current_platform=darwin` 的报告，完整功能覆盖只接受 source 模式报告，`wechat_cache_verified` 只接受 Windows 上 `articles-cache-verify` 产出的真实缓存导出报告，避免把 HTTP-only、CI mock runtime 或错误平台报告误当成完整验收。输出里的 `evidence_sources` 会列出每个证据项来自哪个输入报告，`completion_requirements` 会逐项给出最终门禁状态；如果仍未完成，`next_actions` 会按缺失门禁给出可执行的下一步命令，便于 agent 做机器审计和续跑。
 
 `completion_requirements.source_cli_coverage` 是由 `route_operations_callable`、`source_dynamic_capabilities_verified`、`frontend_api_references_verified` 和 `preferred_commands_parseable` 组成的 source 模式组合门禁；`agent_profile` 是单独门禁。这样 agent 能区分“CLI 功能覆盖已证明”和“无交互 profile 烟测还未证明”。
 
@@ -218,7 +218,7 @@ Windows 侧如果只有已运行 sidecar，也可以保存 HTTP 模式报告:
 uv run gh-ui --api-base http://127.0.0.1:8765 verify --with-data-query --strict --save verify-windows.json
 ```
 
-CI 中会在 macOS / Windows matrix 上安装构建出的 wheel，然后运行 `gh-ui runtime-verify` 启动临时 mock sidecar，生成 `verify-${runner.os}-py${python-version}.json` 并上传 artifact。这个报告可作为 `verify-merge` 的 Windows runtime 证据；完整完成仍需要至少一份 source 模式报告证明动态数据能力和前端 API 引用覆盖。
+CI 中会在 macOS / Windows matrix 上安装构建出的 wheel，然后运行 `gh-ui runtime-verify` 启动临时 mock sidecar，生成 `verify-${runner.os}-py${python-version}.json` 并上传 artifact。这个报告可作为 `verify-merge` 的 Windows runtime 证据；完整完成仍需要至少一份 source 模式报告证明动态数据能力和前端 API 引用覆盖，并需要在真实 Windows 微信环境运行 `articles-cache-verify` 证明本机缓存导出链路。
 
 安装后的 CLI 也内置同样的轻量 runtime 验证入口，不依赖仓库里的 `scripts/` 目录:
 

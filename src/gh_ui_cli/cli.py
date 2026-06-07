@@ -266,6 +266,7 @@ def handle_verify_plan(args: argparse.Namespace) -> None:
         build_verification_plan(
             mac_report=args.mac_report,
             windows_report=args.windows_report,
+            wechat_cache_report=args.wechat_cache_report,
             artifact_dir=args.artifact_dir,
         ),
         save=args.save,
@@ -508,7 +509,16 @@ def _ci_status_commands(
         "download_windows_ci_artifact": _command_spec(
             ["gh", "run", "download", *repo_args, "--name", artifact_name, "--dir", artifact_dir]
         ),
-        "merge_artifacts": _command_spec(["gh-ui", "verify-merge", mac_report, artifact_dir, "--strict-goal"]),
+        "merge_artifacts": _command_spec(
+            [
+                "gh-ui",
+                "verify-merge",
+                mac_report,
+                artifact_dir,
+                "verify-wechat-cache-windows.json",
+                "--strict-goal",
+            ]
+        ),
     }
 
 
@@ -641,6 +651,7 @@ def _verification_bundle_readme(
 ) -> str:
     windows_runtime = plan["commands"]["windows_runtime_report"]["command_shell"]["posix"]
     windows_sidecar = plan["commands"]["windows_http_sidecar_report"]["command_shell"]["posix"]
+    windows_wechat_cache = plan["commands"]["windows_wechat_cache_report"]["command_shell"]["posix"]
     merge_reports = plan["commands"]["merge_reports"]["command_shell"]["posix"]
     merge_artifacts = plan["commands"]["merge_artifacts"]["command_shell"]["posix"]
     download_artifact = plan["commands"]["download_windows_ci_artifact"]["command_shell"]["posix"]
@@ -659,6 +670,8 @@ def _verification_bundle_readme(
         f"```powershell\n{windows_runtime}\n```\n\n"
         "If a gh_quant_ui sidecar is already running on Windows:\n\n"
         f"```powershell\n{windows_sidecar}\n```\n\n"
+        "Then verify a real local WeChat official-account cache export on Windows:\n\n"
+        f"```powershell\n{windows_wechat_cache}\n```\n\n"
         "Then merge reports:\n\n"
         f"```bash\n{merge_reports}\n```\n\n"
         "Check GitHub Actions evidence before downloading artifacts:\n\n"
@@ -2440,6 +2453,7 @@ def build_parser() -> argparse.ArgumentParser:
     verify_plan = sub.add_parser("verify-plan", help="emit machine-readable goal verification plan")
     verify_plan.add_argument("--mac-report", default="verify-macos.json")
     verify_plan.add_argument("--windows-report", default="verify-windows.json")
+    verify_plan.add_argument("--wechat-cache-report", default="verify-wechat-cache-windows.json")
     verify_plan.add_argument("--artifact-dir", default="verify-artifacts")
     add_save(verify_plan)
     verify_plan.set_defaults(func=handle_verify_plan)

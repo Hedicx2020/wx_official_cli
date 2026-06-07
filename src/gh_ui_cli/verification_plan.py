@@ -6,10 +6,9 @@ from .manifest import _shell_commands
 
 
 OBJECTIVE = (
-    "/Users/hedi/gh_quant_ui "
-    "\u5c06\u8fd9\u4e2a\u9879\u76ee\u6240\u6709\u529f\u80fd\u53d8\u4e3acli\u5de5\u5177"
-    "\uff0c\u6ce8\u610fWindows\u548cmac\u7cfb\u7edf\u90fd\u80fd\u8fd0\u884c "
-    "\u65b9\u4fbfagent\u8c03\u7528"
+    "Build and publish wx_official_cli so agents can export locally cached "
+    "WeChat official-account articles by account name on Windows, with macOS "
+    "source evidence, Windows runtime evidence, and real Windows WeChat cache export evidence."
 )
 SOURCE_CLI_EVIDENCE = [
     "route_operations_callable",
@@ -23,11 +22,13 @@ def build_verification_plan(
     *,
     mac_report: str = "verify-macos.json",
     windows_report: str = "verify-windows.json",
+    wechat_cache_report: str = "verify-wechat-cache-windows.json",
     artifact_dir: str = "verify-artifacts",
 ) -> dict[str, Any]:
     return {
         "objective": OBJECTIVE,
         "completion_claimable_without_windows_runtime": False,
+        "completion_claimable_without_windows_wechat_cache": False,
         "completion_requirements": {
             "no_failed_reports": {
                 "description": "Every input report passed its own checks.",
@@ -58,6 +59,20 @@ def build_verification_plan(
                     "commands.windows_http_sidecar_report",
                     "commands.merge_artifacts",
                 ],
+            },
+            "wechat_cache_export": {
+                "description": (
+                    "Real Windows WeChat cache export succeeded for an already logged-in "
+                    "local WeChat client and wrote article index plus HTML files."
+                ),
+                "required_platform": "win32",
+                "required_evidence": [
+                    "requirements.wechat_path_detected.ok",
+                    "requirements.database_key_available.ok",
+                    "requirements.articles_exported.ok",
+                    "requirements.html_files_written.ok",
+                ],
+                "proven_by": ["commands.windows_wechat_cache_report"],
             },
         },
         "commands": {
@@ -141,13 +156,26 @@ def build_verification_plan(
                 platform="win32",
                 proves=["windows_runtime", "agent_profile"],
             ),
+            "windows_wechat_cache_report": _command(
+                [
+                    "gh-ui",
+                    "wechat",
+                    "articles-cache-verify",
+                    "<ACCOUNT_NAME>",
+                    "--strict",
+                    "--save",
+                    wechat_cache_report,
+                ],
+                platform="win32",
+                proves=["wechat_cache_export"],
+            ),
             "merge_reports": _command(
-                ["gh-ui", "verify-merge", mac_report, windows_report, "--strict-goal"],
+                ["gh-ui", "verify-merge", mac_report, windows_report, wechat_cache_report, "--strict-goal"],
                 platform="any",
                 proves=["completion_ready"],
             ),
             "merge_artifacts": _command(
-                ["gh-ui", "verify-merge", mac_report, artifact_dir, "--strict-goal"],
+                ["gh-ui", "verify-merge", mac_report, artifact_dir, wechat_cache_report, "--strict-goal"],
                 platform="any",
                 proves=["completion_ready"],
             ),
@@ -169,6 +197,7 @@ def build_verification_plan(
         "notes": [
             "Do not mark the goal complete until merge_reports or merge_artifacts exits 0 with completion_ready=true.",
             "A macOS report cannot prove windows_runtime; a Windows report must contain current_platform=win32.",
+            "A mock runtime or GitHub Actions report cannot prove wechat_cache_export; run articles-cache-verify on a Windows machine with local WeChat cache.",
             "HTTP/API-base Windows reports can prove runtime only, not source_cli_coverage.",
         ],
     }
