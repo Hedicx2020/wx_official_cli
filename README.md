@@ -51,6 +51,8 @@ wx-official-cli --help
 uv run wx-official-cli status
 ```
 
+Windows 下 `status` 还会报告是否能看到 `Weixin.exe` / `WeChat.exe` 进程，方便 agent 先确认微信已经打开并登录。
+
 再按公众号名字导出：
 
 ```bash
@@ -69,7 +71,7 @@ uv run wx-official-cli crawl "公众号名字" --limit 100 --output-dir ./wechat
 uv run wx-official-cli verify "公众号名字" --strict --save verify-wechat-cache-windows.json
 ```
 
-`verify` 会实际运行导出流程，并检查微信缓存路径、数据库 key、文章数量和 HTML 文件写出情况。`--strict` 会在任一要求不满足时返回非零退出码。
+`verify` 会实际运行导出流程，并检查微信缓存路径、微信进程可见性、数据库 key、文章数量和 HTML 文件写出情况。`--strict` 会在任一要求不满足时返回非零退出码。
 报告还会检查 `index.json` / `index.csv` 是否写出，并确认 `index.json` 中的文章数量与导出结果一致。
 
 ## Agent Manifest

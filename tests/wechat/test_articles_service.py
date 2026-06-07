@@ -219,6 +219,9 @@ class SyncTest(_Env):
             "configured_path": "",
             "has_password": True,
             "key_count": 1,
+            "wechat_process_running": True,
+            "wechat_process_count": 1,
+            "wechat_process_pids": [123],
         }
         with patch("gh_ui_cli.wechat.services.articles.sync.export_cached_by_account", return_value=export):
             with patch("gh_ui_cli.wechat.services.keys.password_status", return_value=status):
@@ -226,6 +229,7 @@ class SyncTest(_Env):
         self.assertTrue(out["ok"])
         self.assertTrue(out["requirements"]["wechat_path_detected"]["ok"])
         self.assertTrue(out["requirements"]["database_key_available"]["ok"])
+        self.assertTrue(out["requirements"]["wechat_process_visible"]["ok"])
         self.assertTrue(out["requirements"]["articles_exported"]["ok"])
         self.assertTrue(out["requirements"]["html_files_written"]["ok"])
         self.assertTrue(out["requirements"]["index_files_written"]["ok"])
@@ -255,6 +259,9 @@ class SyncTest(_Env):
             "configured_path": "",
             "has_password": True,
             "key_count": 1,
+            "wechat_process_running": True,
+            "wechat_process_count": 1,
+            "wechat_process_pids": [123],
         }
         with patch("gh_ui_cli.wechat.services.articles.sync.export_cached_by_account", return_value=export):
             with patch("gh_ui_cli.wechat.services.keys.password_status", return_value=status):
@@ -278,6 +285,9 @@ class SyncTest(_Env):
             "configured_path": "",
             "has_password": True,
             "key_count": 1,
+            "wechat_process_running": True,
+            "wechat_process_count": 1,
+            "wechat_process_pids": [123],
         }
         with patch("gh_ui_cli.wechat.services.articles.sync.export_cached_by_account", return_value=export):
             with patch("gh_ui_cli.wechat.services.keys.password_status", return_value=status):
@@ -289,6 +299,42 @@ class SyncTest(_Env):
         self.assertEqual(out["current_platform"], "windows")
         self.assertFalse(out["goal_evidence"]["wechat_cache_verified"])
 
+    def test_verify_cache_export_fails_when_windows_wechat_process_is_not_visible(self):
+        html_file = Path(self._tmp.name) / "out" / "001.html"
+        html_file.parent.mkdir()
+        html_file.write_text("<html>正文</html>", encoding="utf-8")
+        index_json = html_file.parent / "index.json"
+        index_json.write_text(json.dumps({"article_count": 1, "articles": [{"title": "Alpha"}]}), encoding="utf-8")
+        index_csv = html_file.parent / "index.csv"
+        index_csv.write_text("title\nAlpha\n", encoding="utf-8-sig")
+        export = {
+            "status": "ok",
+            "article_count": 1,
+            "html_files": [str(html_file)],
+            "index_json": str(index_json),
+            "index_csv": str(index_csv),
+            "output_dir": str(html_file.parent),
+            "password_auto": {"status": "skipped"},
+        }
+        status = {
+            "platform": "windows",
+            "detected_path": "C:/Users/me/Documents/WeChat Files/wxid/db_storage",
+            "configured_path": "",
+            "has_password": True,
+            "key_count": 1,
+            "wechat_process_running": False,
+            "wechat_process_count": 0,
+            "wechat_process_pids": [],
+        }
+        with patch("gh_ui_cli.wechat.services.articles.sync.export_cached_by_account", return_value=export):
+            with patch("gh_ui_cli.wechat.services.keys.password_status", return_value=status):
+                out = sync_svc.verify_cache_export("Alpha 研究")
+
+        self.assertFalse(out["ok"])
+        self.assertFalse(out["requirements"]["wechat_process_visible"]["ok"])
+        self.assertFalse(out["goal_evidence"]["wechat_cache_verified"])
+        self.assertIn("Weixin.exe", "\n".join(out["next_actions"]))
+
     def test_verify_cache_export_reports_export_error_instead_of_raising(self):
         status = {
             "platform": "windows",
@@ -296,6 +342,9 @@ class SyncTest(_Env):
             "configured_path": "",
             "has_password": False,
             "key_count": 0,
+            "wechat_process_running": False,
+            "wechat_process_count": 0,
+            "wechat_process_pids": [],
         }
         err = WechatDataMissing(
             "自动获取微信数据库解密 key 失败",
@@ -310,6 +359,7 @@ class SyncTest(_Env):
         self.assertIn("解密 key", out["error"]["message"])
         self.assertFalse(out["requirements"]["wechat_path_detected"]["ok"])
         self.assertFalse(out["requirements"]["database_key_available"]["ok"])
+        self.assertFalse(out["requirements"]["wechat_process_visible"]["ok"])
         self.assertFalse(out["requirements"]["articles_exported"]["ok"])
         self.assertFalse(out["requirements"]["html_files_written"]["ok"])
         self.assertEqual(out["mode"], "wechat_cache")

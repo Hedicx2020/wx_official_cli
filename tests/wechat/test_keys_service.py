@@ -175,6 +175,20 @@ class PasswordStatusTest(unittest.TestCase):
         self.assertTrue(out["has_password"])
         self.assertEqual(out["key_count"], 2)
 
+    def test_status_reports_windows_wechat_process_visibility(self):
+        with TemporaryDirectory() as tmp:
+            with patch.dict("os.environ", {"GH_WX_DATA_DIR": tmp, "USERPROFILE": tmp}, clear=False):
+                with patch("platform.system", return_value="Windows"):
+                    with patch(
+                        "gh_ui_cli.wechat.adapters.scanner_win._list_weixin_pids",
+                        return_value=[(123, 456000), (456, 120000)],
+                    ):
+                        out = keys_svc.password_status()
+
+        self.assertTrue(out["wechat_process_running"])
+        self.assertEqual(out["wechat_process_count"], 2)
+        self.assertEqual(out["wechat_process_pids"], [123, 456])
+
 
 class ResolveDbDirTest(unittest.TestCase):
     def test_uses_configured_path_when_exists(self):

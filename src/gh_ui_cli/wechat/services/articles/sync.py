@@ -188,6 +188,7 @@ def verify_cache_export(
     article_count = int(export.get("article_count") or 0)
     password_auto_status = str((export.get("password_auto") or {}).get("status") or "")
     index_files = _verify_index_files(export, article_count)
+    current_platform = str(status.get("platform") or "")
     requirements = {
         "wechat_path_detected": {
             "ok": bool(status.get("detected_path") or status.get("configured_path")),
@@ -204,6 +205,12 @@ def verify_cache_export(
             "key_count": int(status.get("key_count") or 0),
             "password_auto_status": password_auto_status,
         },
+        "wechat_process_visible": {
+            "ok": current_platform == "windows" and bool(status.get("wechat_process_running")),
+            "process_count": int(status.get("wechat_process_count") or 0),
+            "process_pids": status.get("wechat_process_pids") or [],
+            "process_error": status.get("wechat_process_error", ""),
+        },
         "articles_exported": {
             "ok": article_count > 0,
             "article_count": article_count,
@@ -216,7 +223,6 @@ def verify_cache_export(
         "index_files_written": index_files,
     }
     ok = all(bool(item.get("ok")) for item in requirements.values())
-    current_platform = str(status.get("platform") or "")
     return {
         "ok": ok,
         "mode": "wechat_cache",
@@ -247,6 +253,11 @@ def _cache_verify_next_actions(requirements: dict[str, dict[str, Any]]) -> list[
             "确认 Weixin.exe / WeChat.exe 正在运行并已登录，然后运行 "
             'wx-official-cli verify "公众号名字" --strict --save verify-wechat-cache-windows.json；'
             "不要加 --no-auto-password。"
+        )
+    if not requirements["wechat_process_visible"]["ok"]:
+        actions.append(
+            "打开并登录 Windows 微信，确认任务管理器中能看到 Weixin.exe / WeChat.exe，"
+            "然后重新运行 wx-official-cli status。"
         )
     if not requirements["articles_exported"]["ok"]:
         actions.append(

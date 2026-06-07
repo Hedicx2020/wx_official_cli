@@ -242,6 +242,34 @@ def password_status() -> dict:
         "configured_path": cur.get("wechat_files_path", ""),
         "has_password": bool(cur.get("database_password")),
         "key_count": len(keys),
+        **_wechat_process_status(plat["platform"]),
+    }
+
+
+def _wechat_process_status(platform_name: str) -> dict:
+    if platform_name != "windows":
+        return {
+            "wechat_process_running": False,
+            "wechat_process_count": 0,
+            "wechat_process_pids": [],
+            "wechat_process_error": "",
+        }
+    try:
+        from ..adapters import scanner_win
+
+        pids = scanner_win._list_weixin_pids()
+    except Exception as exc:
+        return {
+            "wechat_process_running": False,
+            "wechat_process_count": 0,
+            "wechat_process_pids": [],
+            "wechat_process_error": f"{type(exc).__name__}: {exc}",
+        }
+    return {
+        "wechat_process_running": bool(pids),
+        "wechat_process_count": len(pids),
+        "wechat_process_pids": [pid for pid, _mem_kb in pids],
+        "wechat_process_error": "",
     }
 
 
