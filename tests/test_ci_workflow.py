@@ -47,6 +47,18 @@ class WindowsVerifierScriptTest(unittest.TestCase):
         self.assertLess(script.index("Push-Location $RepoRoot"), script.index("uv run wx-official-cli status"))
         self.assertLess(script.index("Push-Location $RepoRoot"), script.index("uv run wx-official-cli verify"))
 
+    def test_windows_verifier_resolves_output_paths_from_caller_directory(self):
+        script = (ROOT / "scripts" / "verify_windows_cache.ps1").read_text(encoding="utf-8")
+
+        self.assertIn("$CallerRoot = Get-Location", script)
+        self.assertIn("$OutputDirResolved = Resolve-OutputPath $OutputDir", script)
+        self.assertIn("$ReportPathResolved = Resolve-OutputPath $ReportPath", script)
+        self.assertIn("$StatusPathResolved = Resolve-OutputPath $StatusPath", script)
+        self.assertIn("status --save $StatusPathResolved", script)
+        self.assertIn("--output-dir $OutputDirResolved", script)
+        self.assertIn("--save $ReportPathResolved", script)
+        self.assertLess(script.index("$CallerRoot = Get-Location"), script.index("Push-Location $RepoRoot"))
+
 
 if __name__ == "__main__":
     unittest.main()
