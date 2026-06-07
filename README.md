@@ -9,13 +9,13 @@
 ```bash
 git clone https://github.com/Hedicx2020/wx_official_cli.git
 cd wx_official_cli
-uv sync --extra full
+uv sync
 ```
 
 本地开发时直接用：
 
 ```bash
-uv run --extra full wx-official-cli --help
+uv run wx-official-cli --help
 ```
 
 安装 wheel 后用：
@@ -30,25 +30,25 @@ wx-official-cli --help
 2. 检查路径和 key 状态：
 
 ```bash
-uv run --extra full wx-official-cli status
+uv run wx-official-cli status
 ```
 
 3. 按公众号名字导出：
 
 ```bash
-uv run --extra full wx-official-cli export "公众号名字" --limit 100 --output-dir ./wechat_articles
+uv run wx-official-cli export "公众号名字" --limit 100 --output-dir ./wechat_articles
 ```
 
 `crawl` 是 `export` 的等价别名，方便 agent 按自然任务名调用：
 
 ```bash
-uv run --extra full wx-official-cli crawl "公众号名字" --limit 100 --output-dir ./wechat_articles
+uv run wx-official-cli crawl "公众号名字" --limit 100 --output-dir ./wechat_articles
 ```
 
 4. 需要机器可审计的验收报告时运行：
 
 ```bash
-uv run --extra full wx-official-cli verify "公众号名字" --strict --save verify-wechat-cache-windows.json
+uv run wx-official-cli verify "公众号名字" --strict --save verify-wechat-cache-windows.json
 ```
 
 `verify` 会实际运行导出流程，并检查微信缓存路径、数据库 key、文章数量和 HTML 文件写出情况。`--strict` 会在任一要求不满足时返回非零退出码。
@@ -56,7 +56,7 @@ uv run --extra full wx-official-cli verify "公众号名字" --strict --save ver
 ## Agent Manifest
 
 ```bash
-uv run --extra full wx-official-cli manifest
+uv run wx-official-cli manifest
 ```
 
 manifest 只暴露公众号导出相关命令：
@@ -80,7 +80,7 @@ CLI 会优先自动检测常见 Windows 微信目录，包括：
 
 ```powershell
 $env:WECHAT_FILES_DIR="D:\WeChat Files"
-uv run --extra full wx-official-cli verify "公众号名字" --strict --save verify-wechat-cache-windows.json
+uv run wx-official-cli verify "公众号名字" --strict --save verify-wechat-cache-windows.json
 ```
 
 ## 输出
@@ -98,7 +98,7 @@ uv run --extra full wx-official-cli verify "公众号名字" --strict --save ver
 在 macOS 或 CI 上只能证明 CLI 入口、打包和单元测试可用。完整目标必须在真实 Windows 机器上证明：
 
 ```powershell
-uv run --extra full wx-official-cli verify "公众号名字" --strict --save verify-wechat-cache-windows.json
+uv run wx-official-cli verify "公众号名字" --strict --save verify-wechat-cache-windows.json
 ```
 
 当报告里 `ok=true` 且 `goal_evidence.wechat_cache_verified=true` 时，才说明真实 Windows 微信缓存导出链路完成。

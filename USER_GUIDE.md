@@ -16,31 +16,31 @@
 检查状态：
 
 ```powershell
-uv run --extra full wx-official-cli status
+uv run wx-official-cli status
 ```
 
 导出文章：
 
 ```powershell
-uv run --extra full wx-official-cli export "公众号名字" --limit 100 --output-dir .\wechat_articles
+uv run wx-official-cli export "公众号名字" --limit 100 --output-dir .\wechat_articles
 ```
 
 agent 也可以使用等价命令：
 
 ```powershell
-uv run --extra full wx-official-cli crawl "公众号名字" --limit 100 --output-dir .\wechat_articles
+uv run wx-official-cli crawl "公众号名字" --limit 100 --output-dir .\wechat_articles
 ```
 
 生成验收报告：
 
 ```powershell
-uv run --extra full wx-official-cli verify "公众号名字" --strict --save verify-wechat-cache-windows.json
+uv run wx-official-cli verify "公众号名字" --strict --save verify-wechat-cache-windows.json
 ```
 
 查看 agent 可调用清单：
 
 ```powershell
-uv run --extra full wx-official-cli manifest
+uv run wx-official-cli manifest
 ```
 
 ## 可选参数

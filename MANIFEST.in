@@ -1,0 +1,8 @@
+prune src/gh_ui_cli/ai
+prune src/gh_ui_cli/backtest
+prune src/gh_ui_cli/data
+prune src/gh_ui_cli/factor
+prune src/gh_ui_cli/remote
+prune src/gh_ui_cli/system
+
+global-exclude __pycache__ *.py[cod]

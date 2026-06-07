@@ -28,8 +28,8 @@ jobs:
 
       - name: Unit tests
         run: |
-          uv run --extra full python -m unittest discover -s tests -p "test_wx_official_cli.py"
-          uv run --extra full python -m unittest discover -s tests/wechat
+          uv run python -m unittest discover -s tests -p "test_wx_official_cli.py"
+          uv run python -m unittest discover -s tests/wechat
 
       - name: CLI help
         run: |

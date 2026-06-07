@@ -4,6 +4,8 @@ import io
 import json
 import os
 import sys
+import tarfile
+import zipfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
@@ -126,6 +128,11 @@ class WxOfficialCliTest(unittest.TestCase):
 
         self.assertIn('name = "wx-official-cli"', pyproject)
         self.assertNotIn('gh-ui = "gh_ui_cli.cli:main"', pyproject)
+        self.assertNotIn('"fastapi', pyproject)
+        self.assertNotIn('"uvicorn', pyproject)
+        self.assertNotIn('"pandas', pyproject)
+        self.assertNotIn('"akshare', pyproject)
+        self.assertNotIn('"pyecharts', pyproject)
         self.assertIn(
             'wx-official-cli = "gh_ui_cli.wx_official_cli:main"',
             pyproject,
@@ -137,6 +144,61 @@ class WxOfficialCliTest(unittest.TestCase):
 
         self.assertEqual(rc, 0, msg=err)
         self.assertIn("wx-official-cli", out)
+
+    def test_package_main_delegates_to_simplified_entry(self):
+        main_file = Path("src/gh_ui_cli/__main__.py").read_text(encoding="utf-8")
+
+        self.assertIn("from .wx_official_cli import main", main_file)
+        self.assertNotIn("from .cli import main", main_file)
+
+    def test_built_wheel_excludes_unrelated_business_packages(self):
+        wheel = _latest_wheel()
+        sdist = _latest_sdist()
+        unrelated_prefixes = (
+            "gh_ui_cli/data/",
+            "gh_ui_cli/factor/",
+            "gh_ui_cli/backtest/",
+            "gh_ui_cli/ai/",
+            "gh_ui_cli/remote/",
+            "gh_ui_cli/system/",
+        )
+
+        with zipfile.ZipFile(wheel) as archive:
+            names = set(archive.namelist())
+            entry_points = archive.read("wx_official_cli-0.1.0.dist-info/entry_points.txt").decode()
+            metadata = archive.read("wx_official_cli-0.1.0.dist-info/METADATA").decode()
+
+        self.assertIn("wx-official-cli = gh_ui_cli.wx_official_cli:main", entry_points)
+        self.assertNotIn("gh-ui =", entry_points)
+        self.assertFalse(
+            any(name.startswith(unrelated_prefixes) for name in names),
+            "wheel should not package data/factor/backtest/ai/remote/system modules",
+        )
+        self.assertNotIn("Requires-Dist: fastapi", metadata)
+        self.assertNotIn("Requires-Dist: uvicorn", metadata)
+        self.assertNotIn("Requires-Dist: pandas", metadata)
+        self.assertNotIn("Requires-Dist: akshare", metadata)
+
+        with tarfile.open(sdist) as archive:
+            sdist_names = set(archive.getnames())
+        self.assertFalse(
+            any(f"/src/{prefix}" in name for name in sdist_names for prefix in unrelated_prefixes),
+            "sdist should not package data/factor/backtest/ai/remote/system modules",
+        )
+
+
+def _latest_wheel() -> Path:
+    wheels = sorted(Path("dist").glob("wx_official_cli-*.whl"))
+    if not wheels:
+        raise AssertionError("run `uv build` before checking wheel contents")
+    return wheels[-1]
+
+
+def _latest_sdist() -> Path:
+    sdists = sorted(Path("dist").glob("wx_official_cli-*.tar.gz"))
+    if not sdists:
+        raise AssertionError("run `uv build` before checking sdist contents")
+    return sdists[-1]
 
 
 if __name__ == "__main__":

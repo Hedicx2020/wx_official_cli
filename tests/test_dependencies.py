@@ -54,10 +54,18 @@ class DependenciesTest(unittest.TestCase):
         self.assertEqual([item["name"] for item in report["missing"]], ["pymem"])
         self.assertEqual(report["skipped"], [])
 
-    def test_full_extra_keeps_onnxruntime_installable_on_python_310(self):
+    def test_project_dependencies_are_limited_to_wx_official_cli_needs(self):
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
 
-        self.assertIn('"onnxruntime<1.24; python_version < \'3.11\'"', pyproject)
+        self.assertIn('"httpx>=0.27"', pyproject)
+        self.assertIn('"pycryptodome>=3.19"', pyproject)
+        self.assertIn('"zstandard>=0.22"', pyproject)
+        self.assertNotIn('"fastapi', pyproject)
+        self.assertNotIn('"uvicorn', pyproject)
+        self.assertNotIn('"pandas', pyproject)
+        self.assertNotIn('"akshare', pyproject)
+        self.assertNotIn('"pyecharts', pyproject)
+        self.assertNotIn('"onnxruntime', pyproject)
 
     def test_project_publishes_only_wx_official_cli_console_script(self):
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
