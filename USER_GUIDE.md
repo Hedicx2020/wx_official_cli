@@ -1,6 +1,6 @@
 # gh-ui CLI 用户说明书
 
-`gh-ui` 是 `gh_quant_ui` 的命令行工具。它可以让用户或本地 agent 不打开桌面界面，也能查询数据、检查运行环境、调用微信文章、因子、回测等后端能力。
+`gh-ui` 是 `gh_quant_ui` 的命令行工具。安装后也可以用等价命令 `wx-official-cli` 调用同一入口，公众号缓存导出场景推荐用这个名字。它可以让用户或本地 agent 不打开桌面界面，也能查询数据、检查运行环境、调用微信文章、因子、回测等后端能力。
 
 ## 适用场景
 
@@ -16,6 +16,7 @@
 ```bash
 cd /Users/hedi/gh_ui_cli
 uv run gh-ui --help
+uv run wx-official-cli --help
 ```
 
 如果系统还没有安装 `uv`，先按官方方式安装 `uv`，再回到本目录执行上面的命令。

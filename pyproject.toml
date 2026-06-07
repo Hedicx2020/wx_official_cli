@@ -38,6 +38,7 @@ full = [
 
 [project.scripts]
 gh-ui = "gh_ui_cli.cli:main"
+wx-official-cli = "gh_ui_cli.cli:main"
 
 [tool.uv]
 package = true

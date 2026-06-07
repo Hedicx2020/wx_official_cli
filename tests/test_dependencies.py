@@ -59,6 +59,12 @@ class DependenciesTest(unittest.TestCase):
 
         self.assertIn('"onnxruntime<1.24; python_version < \'3.11\'"', pyproject)
 
+    def test_project_exposes_wx_official_cli_console_script_alias(self):
+        pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+
+        self.assertIn('gh-ui = "gh_ui_cli.cli:main"', pyproject)
+        self.assertIn('wx-official-cli = "gh_ui_cli.cli:main"', pyproject)
+
 
 if __name__ == "__main__":
     unittest.main()

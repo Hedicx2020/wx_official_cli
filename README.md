@@ -1,6 +1,6 @@
 # gh_ui_cli
 
-`gh_ui_cli` 是面向本地 agent、脚本和 CI 的命令行工具，**完整覆盖原 `gh_quant_ui` 桌面端的所有后端能力**。
+`gh_ui_cli` 是面向本地 agent、脚本和 CI 的命令行工具，**完整覆盖原 `gh_quant_ui` 桌面端的所有后端能力**。安装后同时提供 `gh-ui` 和 `wx-official-cli` 两个命令入口，二者调用同一实现；公众号缓存导出场景可以优先使用 `wx-official-cli`。
 
 **全模块已独立**：从 v0.3 起，**所有 7 个模块**（wechat / system / data / factor / backtest / ai / remote）的核心子命令都自带本地实现，**不再需要 `gh_quant_ui` 源码或运行中的 sidecar**。
 
@@ -8,7 +8,8 @@
 
 - 83 个本地 capability（`op:wechat:* / op:system:* / op:data:* / op:factor:* / op:backtest:* / op:ai:* / op:remote:*`）
 - 73 条 HTTP route → local capability 映射，`gh-ui` 子命令自动走本地分发
-- 304 个测试全部通过（unittest + pytest）
+- `wx-official-cli` 是 `gh-ui` 的等价别名，便于在 `wx_official_cli` 公开仓库中直接识别公众号文章导出工具
+- 300+ 个测试覆盖核心 CLI、微信缓存导出、跨平台验收计划和包元数据（unittest + pytest）
 
 面向普通用户的安装、连接、常用命令和排障说明见 [USER_GUIDE.md](USER_GUIDE.md)；
 完整设计与分阶段实施记录见 [docs/superpowers/specs/2026-05-26-wechat-standalone-design.md](docs/superpowers/specs/2026-05-26-wechat-standalone-design.md)。
@@ -40,6 +41,7 @@
 ```bash
 cd /Users/hedi/gh_ui_cli
 uv run gh-ui --help
+uv run wx-official-cli --help
 ```
 
 首次在干净环境中调用真实业务端点时安装完整依赖:
@@ -431,4 +433,4 @@ uv run gh-ui data download stock stock_code --token $env:GH_API_TOKEN
 
 CLI 自身只使用 `pathlib`、环境变量、FastAPI in-process 调用和可选 HTTP 调用，路径参数都可通过 `--source-root`、`--db-path`、`--factor-path`、`--export-path` 显式传入。平台相关行为仍保留在原后端中：例如 macOS 微信重签名只在 macOS 有意义，Windows 微信密钥扫描依赖 Windows 本机进程权限。
 
-仓库包含 GitHub Actions 轻量矩阵 `.github/workflows/ci.yml`，会在 `macos-latest` 和 `windows-latest` 上覆盖 Python 3.10 / 3.12，使用 `uv run --extra full` 验证单元测试、`gh-ui --help`、mock sidecar 集成测试、`uv build` 包构建，以及安装构建出的 wheel 后再次运行 `gh-ui` console script。该集成测试会实际运行 `--api-base manifest`、`invoke`、`smoke --with-data-query` 和 `verify --with-data-query --strict`；安装后 smoke 会跑 `gh-ui deps --requirements tests/fixtures/minimal_requirements.txt --strict`，再跑 `gh-ui runtime-verify ...` 生成可上传的 runtime 报告，证明 wheel 在干净 Python 环境里的入口和基础 HTTP 调用链路可用。真实业务 smoke/verify 依赖私有的 `gh_quant_ui`、JyPy、`gh_backtest` 和本地数据目录，需在有这些路径的机器上运行 `uv run --extra full gh-ui verify --with-data-query --windows-deps-preflight --strict`。
+仓库包含 GitHub Actions 轻量矩阵 `.github/workflows/ci.yml`，会在 `macos-latest` 和 `windows-latest` 上覆盖 Python 3.10 / 3.12，使用 `uv run --extra full` 验证单元测试、`gh-ui --help`、`wx-official-cli --help`、mock sidecar 集成测试、`uv build` 包构建，以及安装构建出的 wheel 后再次运行 `gh-ui` 和 `wx-official-cli` console script。该集成测试会实际运行 `--api-base manifest`、`invoke`、`smoke --with-data-query` 和 `verify --with-data-query --strict`；安装后 smoke 会跑 `gh-ui deps --requirements tests/fixtures/minimal_requirements.txt --strict`，再跑 `gh-ui runtime-verify ...` 生成可上传的 runtime 报告，证明 wheel 在干净 Python 环境里的入口和基础 HTTP 调用链路可用。真实业务 smoke/verify 依赖私有的 `gh_quant_ui`、JyPy、`gh_backtest` 和本地数据目录，需在有这些路径的机器上运行 `uv run --extra full gh-ui verify --with-data-query --windows-deps-preflight --strict`。

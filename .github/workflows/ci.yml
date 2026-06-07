@@ -30,7 +30,9 @@ jobs:
         run: uv run --extra full python -m unittest discover -s tests
 
       - name: CLI help
-        run: uv run gh-ui --help
+        run: |
+          uv run gh-ui --help
+          uv run wx-official-cli --help
 
       - name: API-base manifest/invoke/smoke/verify integration
         run: uv run python -m unittest tests.test_cli_http_integration
@@ -47,6 +49,7 @@ jobs:
           GH_UI_CLI_PROFILE: ${{ runner.temp }}/gh-ui-profile.json
         run: |
           gh-ui --help
+          wx-official-cli --help
           gh-ui profile set --api-token ci-api --access-token ci-access --server primary
           gh-ui profile get
           gh-ui deps --requirements tests/fixtures/minimal_requirements.txt --strict
