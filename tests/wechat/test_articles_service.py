@@ -340,6 +340,7 @@ class SyncTest(_Env):
             "password_auto": {"status": "ok"},
         }
         status = {
+            "platform": "windows",
             "detected_path": "C:/Users/me/Documents/WeChat Files/wxid/db_storage",
             "configured_path": "",
             "has_password": True,
@@ -353,6 +354,10 @@ class SyncTest(_Env):
         self.assertTrue(out["requirements"]["database_key_available"]["ok"])
         self.assertTrue(out["requirements"]["articles_exported"]["ok"])
         self.assertTrue(out["requirements"]["html_files_written"]["ok"])
+        self.assertEqual(out["mode"], "wechat_cache")
+        self.assertEqual(out["current_platform"], "windows")
+        self.assertTrue(out["goal_evidence"]["wechat_cache_verified"])
+        self.assertEqual(out["goal_evidence"]["wechat_cache_account"], "Alpha 研究")
 
     def test_verify_cache_export_fails_when_no_articles_exported(self):
         export = {
@@ -363,6 +368,7 @@ class SyncTest(_Env):
             "password_auto": {"status": "skipped"},
         }
         status = {
+            "platform": "windows",
             "detected_path": "C:/Users/me/Documents/WeChat Files/wxid/db_storage",
             "configured_path": "",
             "has_password": True,
@@ -374,9 +380,13 @@ class SyncTest(_Env):
         self.assertFalse(out["ok"])
         self.assertFalse(out["requirements"]["articles_exported"]["ok"])
         self.assertFalse(out["requirements"]["html_files_written"]["ok"])
+        self.assertEqual(out["mode"], "wechat_cache")
+        self.assertEqual(out["current_platform"], "windows")
+        self.assertFalse(out["goal_evidence"]["wechat_cache_verified"])
 
     def test_verify_cache_export_reports_export_error_instead_of_raising(self):
         status = {
+            "platform": "windows",
             "detected_path": "",
             "configured_path": "",
             "has_password": False,
@@ -397,6 +407,9 @@ class SyncTest(_Env):
         self.assertFalse(out["requirements"]["database_key_available"]["ok"])
         self.assertFalse(out["requirements"]["articles_exported"]["ok"])
         self.assertFalse(out["requirements"]["html_files_written"]["ok"])
+        self.assertEqual(out["mode"], "wechat_cache")
+        self.assertEqual(out["current_platform"], "windows")
+        self.assertFalse(out["goal_evidence"]["wechat_cache_verified"])
         next_actions = "\n".join(out["next_actions"])
         self.assertIn("Weixin.exe", next_actions)
         self.assertIn("WeChat.exe", next_actions)

@@ -230,9 +230,17 @@ def verify_cache_export(
         },
     }
     ok = all(bool(item.get("ok")) for item in requirements.values())
+    current_platform = str(status.get("platform") or "")
     return {
         "ok": ok,
+        "mode": "wechat_cache",
+        "platform": current_platform,
+        "current_platform": current_platform,
         "account_name": account_name,
+        "goal_evidence": {
+            "wechat_cache_verified": ok,
+            "wechat_cache_account": account_name,
+        },
         "requirements": requirements,
         "password_status": status,
         "export": export,
