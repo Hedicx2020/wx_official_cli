@@ -1,4 +1,4 @@
-"""Command line tools for gh_quant_ui."""
+"""wx_official_cli package."""
 
 __all__ = ["__version__"]
 

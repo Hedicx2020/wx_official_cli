@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+from dataclasses import asdict, is_dataclass
 from typing import Any
 
 from ... import paths
@@ -17,13 +17,8 @@ def get_store() -> ArticleStore:
 
 
 def to_jsonable(obj: Any) -> Any:
-    from ...adapters.article_store import to_dict
-
-    if hasattr(obj, "__dict__") or hasattr(obj, "_asdict"):
-        try:
-            return to_dict(obj)
-        except Exception:
-            pass
+    if is_dataclass(obj) and not isinstance(obj, type):
+        return asdict(obj)
     if isinstance(obj, list):
         return [to_jsonable(v) for v in obj]
     if isinstance(obj, dict):

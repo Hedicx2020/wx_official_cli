@@ -47,7 +47,6 @@ class WechatCliIntegrationTest(unittest.TestCase):
                     "export",
                     "Alpha",
                     "--no-scan",
-                    "--no-fetch-html",
                     "--output-dir",
                     output_dir,
                 ],
@@ -69,14 +68,12 @@ class WechatCliIntegrationTest(unittest.TestCase):
                         "export",
                         "Alpha",
                         "--no-auto-password",
-                        "--no-fetch-html",
                     ],
                     {"GH_WX_DATA_DIR": tmp},
                 )
         self.assertEqual(rc, 0, msg=out)
         export.assert_called_once()
         self.assertFalse(export.call_args.kwargs["auto_password"])
-        self.assertFalse(export.call_args.kwargs["fetch_html"])
 
     def test_articles_cache_verify_strict_exits_nonzero_when_requirements_fail(self):
         with TemporaryDirectory() as tmp:
@@ -110,7 +107,6 @@ class WechatCliIntegrationTest(unittest.TestCase):
                         "5",
                         "--output-dir",
                         str(Path(tmp) / "verify"),
-                        "--no-fetch-html",
                         "--no-auto-password",
                     ],
                     {"GH_WX_DATA_DIR": tmp},
@@ -118,7 +114,6 @@ class WechatCliIntegrationTest(unittest.TestCase):
         self.assertEqual(rc, 0, msg=out)
         kwargs = verify.call_args.kwargs
         self.assertEqual(kwargs["limit"], 5)
-        self.assertFalse(kwargs["fetch_html"])
         self.assertFalse(kwargs["auto_password"])
 
 

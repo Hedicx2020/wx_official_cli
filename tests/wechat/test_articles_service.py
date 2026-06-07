@@ -13,12 +13,8 @@ from unittest.mock import patch
 
 from gh_ui_cli.wechat.adapters.article_store import Article, MpAccount
 from gh_ui_cli.wechat.adapters.local_articles import LocalArticle
-from gh_ui_cli.wechat.errors import KeyNotFound, WechatInvalidInput, WechatDataMissing
+from gh_ui_cli.wechat.errors import KeyNotFound, WechatDataMissing
 from gh_ui_cli.wechat.services.articles import (
-    accounts as accounts_svc,
-    categories as categories_svc,
-    login as login_svc,
-    settings as settings_svc,
     store as store_mod,
     sync as sync_svc,
 )
@@ -33,97 +29,6 @@ class _Env(unittest.TestCase):
     def tearDown(self):
         self._patch.stop()
         self._tmp.cleanup()
-
-
-class SettingsTest(_Env):
-    def test_defaults(self):
-        s = settings_svc.load()
-        self.assertTrue(s["platform_url"])
-        self.assertFalse(s["auto_sync"])
-        self.assertEqual(s["sync_interval_minutes"], 60)
-        self.assertFalse(s["has_credentials"])
-
-    def test_update_persists(self):
-        s = settings_svc.update({"auto_sync": True, "sync_interval_minutes": 30})
-        self.assertTrue(s["auto_sync"])
-        self.assertEqual(s["sync_interval_minutes"], 30)
-        # min clamp
-        s2 = settings_svc.update({"sync_interval_minutes": 1})
-        self.assertEqual(s2["sync_interval_minutes"], 5)
-
-
-class CategoriesTest(_Env):
-    def test_create_and_list(self):
-        cat = categories_svc.create("研究")
-        self.assertEqual(cat["name"], "研究")
-        listed = categories_svc.list_all()
-        self.assertEqual(listed["total"], 1)
-        self.assertEqual(listed["items"][0]["name"], "研究")
-
-    def test_create_empty_name(self):
-        with self.assertRaises(WechatInvalidInput):
-            categories_svc.create("   ")
-
-    def test_create_duplicate(self):
-        categories_svc.create("研究")
-        with self.assertRaises(WechatInvalidInput):
-            categories_svc.create("研究")
-
-    def test_rename(self):
-        cat = categories_svc.create("研究")
-        cid = cat["category_id"]
-        categories_svc.rename(cid, "市场")
-        names = [c["name"] for c in categories_svc.list_all()["items"]]
-        self.assertIn("市场", names)
-
-    def test_rename_missing(self):
-        with self.assertRaises(WechatDataMissing):
-            categories_svc.rename(999, "x")
-
-    def test_delete(self):
-        cat = categories_svc.create("研究")
-        categories_svc.delete(cat["category_id"])
-        self.assertEqual(categories_svc.list_all()["total"], 0)
-
-
-class AccountsTest(_Env):
-    def _add(self, mp_id="biz_a", name="A"):
-        store_mod.get_store().upsert_mp(MpAccount(mp_id=mp_id, name=name))
-
-    def test_list_empty(self):
-        self.assertEqual(accounts_svc.list_all()["total"], 0)
-
-    def test_list_filters_by_category(self):
-        self._add("biz_a", "A")
-        cat = categories_svc.create("研究")
-        accounts_svc.set_categories("biz_a", [cat["category_id"]])
-        listed = accounts_svc.list_all(category_id=cat["category_id"])
-        self.assertEqual(listed["total"], 1)
-
-    def test_set_favorite(self):
-        self._add("biz_a", "A")
-        out = accounts_svc.set_favorite("biz_a", True)
-        self.assertTrue(out["is_favorite"])
-
-    def test_get_categories_missing(self):
-        with self.assertRaises(WechatDataMissing):
-            accounts_svc.get_categories("non_existent")
-
-    def test_delete(self):
-        self._add("biz_a", "A")
-        out = accounts_svc.delete("biz_a")
-        self.assertEqual(out["status"], "ok")
-        self.assertEqual(accounts_svc.list_all()["total"], 0)
-
-
-class LoginStatusTest(_Env):
-    def test_status_when_no_credentials(self):
-        out = login_svc.status()
-        self.assertFalse(out["logged_in"])
-
-    def test_logout_clears_credentials(self):
-        out = login_svc.logout()
-        self.assertEqual(out["status"], "ok")
 
 
 class SyncTest(_Env):
@@ -160,7 +65,6 @@ class SyncTest(_Env):
                 out = sync_svc.export_cached_by_account(
                     "Alpha 研究",
                     output_dir=str(out_dir),
-                    fetch_html=False,
                 )
 
         self.assertEqual(out["status"], "ok")
@@ -176,38 +80,7 @@ class SyncTest(_Env):
         self.assertIn("Alpha 一季报点评", html)
         self.assertIn("https://mp.weixin.qq.com", html)
 
-    def test_export_cached_by_account_fetches_full_html_from_cached_url_by_default(self):
-        store = store_mod.get_store()
-        store.upsert_mp(MpAccount(mp_id="biz_alpha", name="Alpha 研究"))
-        store.upsert_articles([
-            Article(
-                id="alpha-1",
-                mp_id="biz_alpha",
-                title="Alpha 正文",
-                url="https://mp.weixin.qq.com/s/alpha",
-                published_at=1_765_000_000,
-            )
-        ])
-
-        class _Client:
-            def fetch_article_html(self, article_id: str, *, url: str = "") -> str:
-                self.article_id = article_id
-                self.url = url
-                return "<!doctype html><html><body><article>真实正文</article></body></html>"
-
-        with patch("gh_ui_cli.wechat.services.articles.sync.WereadClient", return_value=_Client()):
-            out = sync_svc.export_cached_by_account(
-                "Alpha",
-                output_dir=str(Path(self._tmp.name) / "full-html"),
-                scan_first=False,
-            )
-
-        self.assertEqual(out["article_count"], 1)
-        html = Path(out["html_files"][0]).read_text(encoding="utf-8")
-        self.assertIn("真实正文", html)
-        self.assertEqual(out["articles"][0]["html_source"], "fetched")
-
-    def test_export_cached_by_account_can_skip_full_html_fetch(self):
+    def test_export_cached_by_account_writes_placeholder_for_cached_url(self):
         store = store_mod.get_store()
         store.upsert_mp(MpAccount(mp_id="biz_alpha", name="Alpha 研究"))
         store.upsert_articles([
@@ -220,17 +93,15 @@ class SyncTest(_Env):
             )
         ])
 
-        with patch("gh_ui_cli.wechat.services.articles.sync.WereadClient") as client:
-            out = sync_svc.export_cached_by_account(
-                "Alpha",
-                output_dir=str(Path(self._tmp.name) / "placeholder"),
-                scan_first=False,
-                fetch_html=False,
-            )
+        out = sync_svc.export_cached_by_account(
+            "Alpha",
+            output_dir=str(Path(self._tmp.name) / "placeholder"),
+            scan_first=False,
+        )
 
-        self.assertEqual(client.call_count, 0)
         html = Path(out["html_files"][0]).read_text(encoding="utf-8")
         self.assertIn("此文件来自本机微信缓存导出", html)
+        self.assertIn("https://mp.weixin.qq.com/s/alpha", html)
         self.assertEqual(out["articles"][0]["html_source"], "placeholder")
 
     def test_export_cached_by_account_auto_gets_password_then_retries_decrypt(self):
@@ -259,7 +130,6 @@ class SyncTest(_Env):
                     out = sync_svc.export_cached_by_account(
                         "Alpha 研究",
                         output_dir=str(Path(self._tmp.name) / "auto"),
-                        fetch_html=False,
                     )
 
         self.assertEqual(out["status"], "ok")
@@ -298,7 +168,6 @@ class SyncTest(_Env):
             "Alpha",
             output_dir=str(Path(self._tmp.name) / "existing"),
             scan_first=False,
-            fetch_html=False,
         )
         self.assertEqual(out["status"], "ok")
         self.assertEqual(out["scanned"], 0)
@@ -321,7 +190,6 @@ class SyncTest(_Env):
             "Alpha研究",
             output_dir=str(Path(self._tmp.name) / "normalized-name"),
             scan_first=False,
-            fetch_html=False,
         )
 
         self.assertEqual(out["status"], "ok")
@@ -413,26 +281,12 @@ class SyncTest(_Env):
         next_actions = "\n".join(out["next_actions"])
         self.assertIn("Weixin.exe", next_actions)
         self.assertIn("WeChat.exe", next_actions)
-
-
-class CapabilitiesTest(_Env):
-    def test_all_registered(self):
-        from gh_ui_cli.wechat import registry
-        ids = set(registry.list_ids())
-        expected = {
-            "op:wechat:articles-settings",
-            "op:wechat:articles-settings-set",
-            "op:wechat:articles-categories",
-            "op:wechat:articles-categories-create",
-            "op:wechat:articles-accounts",
-            "op:wechat:articles-account-categories",
-            "op:wechat:articles-account-favorite",
-            "op:wechat:articles-account-delete",
-            "op:wechat:articles-list",
-            "op:wechat:articles-scan-local",
-            "op:wechat:articles-login-status",
-        }
-        self.assertTrue(expected.issubset(ids), f"missing: {expected - ids}")
+        self.assertIn("wx-official-cli status", next_actions)
+        self.assertIn("wx-official-cli verify", next_actions)
+        self.assertIn("WECHAT_FILES_DIR", next_actions)
+        self.assertNotIn("wechat password-auto", next_actions)
+        self.assertNotIn("wechat config-set", next_actions)
+        self.assertNotIn("articles-cache-export", next_actions)
 
 
 if __name__ == "__main__":

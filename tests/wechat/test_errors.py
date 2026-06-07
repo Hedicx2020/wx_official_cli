@@ -30,15 +30,9 @@ class WechatErrorsTest(unittest.TestCase):
         e = errors.PlatformUnsupported(message="linux")
         self.assertEqual(e.code, "WX_PLATFORM_UNSUPPORTED")
 
-        e = errors.ArticleFetchBlocked(message="cooldown")
-        self.assertEqual(e.code, "WX_ARTICLE_FETCH_BLOCKED")
-
-        e = errors.LLMAuthFailed(message="401")
-        self.assertEqual(e.code, "WX_LLM_AUTH_FAILED")
-
     def test_subclass_with_hint(self):
-        e = errors.KeyNotFound(message="no key", hint="run password-auto")
-        self.assertEqual(e.hint, "run password-auto")
+        e = errors.KeyNotFound(message="no key", hint="run wx-official-cli verify")
+        self.assertEqual(e.hint, "run wx-official-cli verify")
 
 
 if __name__ == "__main__":

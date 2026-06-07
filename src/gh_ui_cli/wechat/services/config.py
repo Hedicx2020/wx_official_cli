@@ -1,8 +1,4 @@
-"""配置 CRUD：与原 wechat.py /config 端点 1:1 对应。
-
-读写 ~/.gh_ui_cli/wechat/config.json （由 paths.config_path() 控制）。
-不再读 ~/.gh_quant_ui/config.json，但 paths.local_data_dir() 仍兼容那一份。
-"""
+"""微信缓存导出配置读写。"""
 
 from __future__ import annotations
 
@@ -12,7 +8,6 @@ from typing import Any
 
 from .. import paths
 from ..models import DEFAULT_CONFIG
-from ..registry import capability
 
 
 def load() -> dict[str, str]:
@@ -39,13 +34,3 @@ def save(patch: dict[str, Any]) -> dict[str, str]:
     tmp.write_text(json.dumps(cur, ensure_ascii=False, indent=2), encoding="utf-8")
     tmp.replace(p)
     return cur
-
-
-@capability("op:wechat:config-get")
-def _cap_get(_payload: dict) -> dict:
-    return load()
-
-
-@capability("op:wechat:config-set")
-def _cap_set(payload: dict) -> dict:
-    return save(payload or {})

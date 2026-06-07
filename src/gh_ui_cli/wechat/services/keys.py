@@ -1,12 +1,4 @@
-"""密钥与解密路径服务。
-
-对应原 wechat.py 中的：
-  /password/status              -> password_status
-  /password/auto                -> password_auto (本地版)
-  内部 _detect_platform_paths   -> detect_platform_paths
-  内部 _resolve_db_dir          -> resolve_db_dir
-  内部 _save_keys / _load_keys  -> save_keys / load_keys
-"""
+"""微信缓存路径、密钥提取和数据库解密服务。"""
 
 from __future__ import annotations
 
@@ -17,8 +9,7 @@ import re
 from pathlib import Path
 
 from .. import paths
-from ..errors import KeyNotFound, PlatformUnsupported, WechatError
-from ..registry import capability
+from ..errors import KeyNotFound, WechatError
 from . import config as config_svc
 
 
@@ -261,7 +252,10 @@ def password_auto() -> dict:
         return {
             "status": "error",
             "code": "NO_WECHAT_PATH",
-            "message": "未检测到微信数据库目录。请打开微信登录后再试，或在「配置」Tab 手动填写 wechat_files_path。",
+            "message": (
+                "未检测到微信数据库目录。请打开并登录 Windows 微信后运行 wx-official-cli status；"
+                '如果缓存目录不在默认位置，请先设置 $env:WECHAT_FILES_DIR="D:\\WeChat Files"。'
+            ),
         }
 
     sys_name = platform.system()
@@ -271,18 +265,14 @@ def password_auto() -> dict:
         log_lines.append(msg)
 
     try:
-        if sys_name == "Windows":
-            from ..adapters import scanner_win
-            key_map = scanner_win.extract_keys(db_dir, on_log=on_log)
-        elif sys_name == "Darwin":
-            from ..adapters import scanner_mac
-            key_map = scanner_mac.extract_keys(db_dir, on_log=on_log)
-        else:
+        if sys_name != "Windows":
             return {
                 "status": "error",
                 "code": "PLATFORM_UNSUPPORTED",
-                "message": f"暂不支持当前平台: {sys_name}",
+                "message": f"自动提取数据库 key 仅支持 Windows 微信: {sys_name}",
             }
+        from ..adapters import scanner_win
+        key_map = scanner_win.extract_keys(db_dir, on_log=on_log)
     except RuntimeError as e:
         msg = str(e)
         for code in ("RESIGN_NEEDED", "USER_CANCELLED", "NO_WECHAT"):
@@ -340,7 +330,10 @@ def ensure_decrypted() -> str:
     if not db_dir:
         raise WechatError(
             "未配置微信数据目录",
-            hint="先在「密码」自动获取或在「配置」手动填写",
+            hint=(
+                "先打开并登录 Windows 微信，然后运行 wx-official-cli status；"
+                '如果缓存目录不在默认位置，请先设置 $env:WECHAT_FILES_DIR="D:\\WeChat Files"。'
+            ),
             code="WX_NO_DB_DIR",
         )
 
@@ -352,7 +345,11 @@ def ensure_decrypted() -> str:
         if not (len(single) == 64 and all(c in "0123456789abcdef" for c in single)):
             raise KeyNotFound(
                 "尚未获取密钥",
-                hint="先运行 password-auto 或在配置里填合法的 64 位 hex database_password",
+                hint=(
+                    '去掉 --no-auto-password 后运行 wx-official-cli verify "公众号名字" '
+                    "--strict --save verify-wechat-cache-windows.json；或在本地配置中填入合法的 "
+                    "64 位 hex database_password。"
+                ),
             )
         from ..adapters import key_scan
         dbs, _salt_map = key_scan.collect_db_files(db_dir)
@@ -368,21 +365,3 @@ def ensure_decrypted() -> str:
     from ..adapters import decrypt
     decrypt.decrypt_all_dbs(db_dir, keys, cache_dir=str(cache_dir))
     return str(cache_dir)
-
-
-@capability("op:wechat:password-status")
-def _cap_status(_payload: dict) -> dict:
-    return password_status()
-
-
-@capability("op:wechat:password-auto")
-def _cap_auto(_payload: dict) -> dict:
-    return password_auto()
-
-
-@capability("op:wechat:macos-resign")
-def _cap_resign(_payload: dict) -> dict:
-    if platform.system() != "Darwin":
-        raise PlatformUnsupported("仅 macOS 可用")
-    from ..adapters import scanner_mac
-    return scanner_mac.resign_wechat()

@@ -1,4 +1,4 @@
-"""通用密钥扫描工具（搬运自 gh_quant_ui/api/wechat_native/key_scan.py，纯逻辑）。
+"""本地微信数据库 key 候选校验与内存块扫描工具。
 
 负责：
 - 在 db_storage 下枚举 .db 文件，取 16 字节 salt

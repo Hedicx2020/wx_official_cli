@@ -38,14 +38,6 @@ class PlatformUnsupported(WechatError):
     default_code = "WX_PLATFORM_UNSUPPORTED"
 
 
-class ArticleFetchBlocked(WechatError):
-    default_code = "WX_ARTICLE_FETCH_BLOCKED"
-
-
-class LLMAuthFailed(WechatError):
-    default_code = "WX_LLM_AUTH_FAILED"
-
-
 class WechatDataMissing(WechatError):
     default_code = "WX_DATA_MISSING"
 

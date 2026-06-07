@@ -1,9 +1,4 @@
-"""公众号文章同步与本地扫描。
-
-精简版：保留 list articles / fetch / scan_local / import_local 几个核心操作。
-完整的 sync_by_category 流程依赖 WereadClient 真实 platform 调用，agent
-环境多数情况下走 scan_local 即可。
-"""
+"""微信公众号缓存文章扫描、导入和导出。"""
 
 from __future__ import annotations
 
@@ -16,21 +11,15 @@ from typing import Any
 
 from ... import paths
 from ...adapters.local_articles import import_to_store, scan_local
-from ...adapters.weread_client import WereadClient
 from ...errors import WechatDataMissing, WechatError, WechatInvalidInput
-from ...registry import capability
 from .store import get_store, to_jsonable
 
 
-def list_articles(category_id: int | None = None,
-                  mp_id: str | None = None,
+def list_articles(mp_id: str | None = None,
                   limit: int = 100,
                   offset: int = 0) -> dict[str, Any]:
     store = get_store()
-    if category_id is not None:
-        items = store.list_articles_by_category(int(category_id), limit=int(limit), offset=int(offset))
-    else:
-        items = store.list_articles(mp_id=mp_id or None, limit=int(limit), offset=int(offset))
+    items = store.list_articles(mp_id=mp_id or None, limit=int(limit), offset=int(offset))
     return {"items": [to_jsonable(a) for a in items], "total": len(items)}
 
 
@@ -71,7 +60,6 @@ def export_cached_by_account(
     output_dir: str | None = None,
     scan_first: bool = True,
     auto_password: bool = True,
-    fetch_html: bool = True,
 ) -> dict[str, Any]:
     """按公众号名字从本地缓存导出文章到目录。
 
@@ -118,10 +106,8 @@ def export_cached_by_account(
     for idx, article in enumerate(articles, start=1):
         target = out_dir / f"{idx:03d}-{_safe_fs_name(article.title or article.id)}.html"
         html_text, html_source, fetch_error = _article_html(
-            store,
             article,
             account.name,
-            fetch_html=fetch_html,
         )
         target.write_text(html_text, encoding="utf-8")
         html_files.append(str(target))
@@ -174,7 +160,6 @@ def verify_cache_export(
     output_dir: str | None = None,
     scan_first: bool = True,
     auto_password: bool = True,
-    fetch_html: bool = True,
 ) -> dict[str, Any]:
     """运行公众号缓存导出并输出可用于 Windows 真机验收的结构化报告。"""
     from .. import keys as keys_svc
@@ -187,7 +172,6 @@ def verify_cache_export(
             output_dir=output_dir,
             scan_first=scan_first,
             auto_password=auto_password,
-            fetch_html=fetch_html,
         )
     except WechatError as exc:
         error = exc.to_payload()["error"]
@@ -252,13 +236,26 @@ def verify_cache_export(
 def _cache_verify_next_actions(requirements: dict[str, dict[str, Any]]) -> list[str]:
     actions: list[str] = []
     if not requirements["wechat_path_detected"]["ok"]:
-        actions.append("打开并登录 Windows 微信，或用 wechat config-set 手动填写 wechat_files_path。")
+        actions.append(
+            "打开并登录 Windows 微信；如果缓存目录不在默认位置，设置 "
+            '$env:WECHAT_FILES_DIR="D:\\WeChat Files" 后运行 wx-official-cli status。'
+        )
     if not requirements["database_key_available"]["ok"]:
-        actions.append("确认 Weixin.exe / WeChat.exe 正在运行并已登录，然后运行 wechat password-auto。")
+        actions.append(
+            "确认 Weixin.exe / WeChat.exe 正在运行并已登录，然后运行 "
+            'wx-official-cli verify "公众号名字" --strict --save verify-wechat-cache-windows.json；'
+            "不要加 --no-auto-password。"
+        )
     if not requirements["articles_exported"]["ok"]:
-        actions.append("确认该公众号文章已出现在本机微信消息缓存中，并使用更完整的公众号名字重试。")
+        actions.append(
+            "确认该公众号文章已出现在本机微信消息缓存中，并使用更完整的公众号名字运行 "
+            'wx-official-cli export "公众号名字" --limit 100 --output-dir .\\wechat_articles。'
+        )
     if not requirements["html_files_written"]["ok"]:
-        actions.append("检查 output_dir 写入权限，或重试 articles-cache-export。")
+        actions.append(
+            "检查 --output-dir 写入权限，然后重试 "
+            'wx-official-cli export "公众号名字" --limit 100 --output-dir .\\wechat_articles。'
+        )
     return actions
 
 
@@ -278,7 +275,7 @@ def _resolve_account(store, name: str):
     if not matches:
         raise WechatDataMissing(
             f"未找到公众号: {name}",
-            hint="先运行 articles-cache-export 时保持默认扫描，或运行 articles-sync-local 导入缓存。",
+            hint="确认文章已在本机微信缓存中，然后运行 wx-official-cli export 时保持默认扫描。",
         )
     needle = name.casefold()
     exact = [m for m in matches if m.name.casefold() == needle or m.mp_id.casefold() == needle]
@@ -332,22 +329,11 @@ def _escape_html(value: str) -> str:
     )
 
 
-def _article_html(store, article, account_name: str, *, fetch_html: bool) -> tuple[str, str, str]:
+def _article_html(article, account_name: str) -> tuple[str, str, str]:
     if article.html_path:
         p = Path(article.html_path)
         if p.exists():
             return p.read_text(encoding="utf-8", errors="replace"), "cached", ""
-    if fetch_html and article.url:
-        try:
-            html = WereadClient().fetch_article_html(article.id, url=article.url)
-            if html.strip():
-                return html, "fetched", ""
-        except Exception as exc:
-            fetch_error = f"{type(exc).__name__}: {exc}"
-        else:
-            fetch_error = "empty html response"
-    else:
-        fetch_error = ""
     title = _escape_html(article.title or "(无标题)")
     account = _escape_html(account_name)
     summary = _escape_html(article.summary or "")
@@ -375,7 +361,7 @@ def _article_html(store, article, account_name: str, *, fetch_html: bool) -> tup
   <div class="note">此文件来自本机微信缓存导出。缓存中没有正文 HTML 时，CLI 会保留标题、摘要和原文链接。</div>
 </body>
 </html>
-""", "placeholder", fetch_error
+""", "placeholder", ""
 
 
 def _write_index_csv(path: Path, articles: list[dict[str, Any]]) -> None:
@@ -405,52 +391,3 @@ def open_html_dir() -> dict[str, Any]:
     except Exception as e:
         return {"status": "error", "message": str(e), "path": str(p)}
     return {"status": "ok", "path": str(p)}
-
-
-@capability("op:wechat:articles-list")
-def _cap_list(payload: dict) -> dict:
-    return list_articles(
-        category_id=payload.get("category_id"),
-        mp_id=payload.get("mp_id"),
-        limit=int(payload.get("limit") or 100),
-        offset=int(payload.get("offset") or 0),
-    )
-
-
-@capability("op:wechat:articles-scan-local")
-def _cap_scan(_payload: dict) -> dict:
-    return scan_from_wechat_cache()
-
-
-@capability("op:wechat:articles-sync-local")
-def _cap_import(_payload: dict) -> dict:
-    return import_scanned()
-
-
-@capability("op:wechat:articles-cache-export")
-def _cap_export(payload: dict) -> dict:
-    return export_cached_by_account(
-        str(payload.get("account_name") or payload.get("name") or ""),
-        limit=int(payload.get("limit") or 100),
-        output_dir=str(payload.get("output_dir") or "") or None,
-        scan_first=bool(payload.get("scan_first", True)),
-        auto_password=bool(payload.get("auto_password", True)),
-        fetch_html=bool(payload.get("fetch_html", True)),
-    )
-
-
-@capability("op:wechat:articles-cache-verify")
-def _cap_verify(payload: dict) -> dict:
-    return verify_cache_export(
-        str(payload.get("account_name") or payload.get("name") or ""),
-        limit=int(payload.get("limit") or 100),
-        output_dir=str(payload.get("output_dir") or "") or None,
-        scan_first=bool(payload.get("scan_first", True)),
-        auto_password=bool(payload.get("auto_password", True)),
-        fetch_html=bool(payload.get("fetch_html", True)),
-    )
-
-
-@capability("op:wechat:articles-open-html-dir")
-def _cap_open_dir(_payload: dict) -> dict:
-    return open_html_dir()

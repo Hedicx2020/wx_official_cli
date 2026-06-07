@@ -36,6 +36,7 @@ class WxOfficialCliTest(unittest.TestCase):
         self.assertIn("export", out)
         self.assertIn("verify", out)
         self.assertIn("status", out)
+        self.assertNotIn("--no-fetch-html", out)
         self.assertNotIn("data", out)
         self.assertNotIn("factor", out)
         self.assertNotIn("backtest", out)
@@ -56,7 +57,6 @@ class WxOfficialCliTest(unittest.TestCase):
                         "5",
                         "--output-dir",
                         str(Path(tmp) / "out"),
-                        "--no-fetch-html",
                         "--no-auto-password",
                     ],
                     {"GH_WX_DATA_DIR": tmp},
@@ -70,7 +70,6 @@ class WxOfficialCliTest(unittest.TestCase):
             output_dir=str(Path(tmp) / "out"),
             scan_first=True,
             auto_password=False,
-            fetch_html=False,
         )
 
     def test_crawl_is_export_alias_for_agents(self):
@@ -130,6 +129,7 @@ class WxOfficialCliTest(unittest.TestCase):
         self.assertNotIn('gh-ui = "gh_ui_cli.cli:main"', pyproject)
         self.assertNotIn('"fastapi', pyproject)
         self.assertNotIn('"uvicorn', pyproject)
+        self.assertNotIn('"httpx', pyproject)
         self.assertNotIn('"pandas', pyproject)
         self.assertNotIn('"akshare', pyproject)
         self.assertNotIn('"pyecharts', pyproject)
@@ -154,14 +154,48 @@ class WxOfficialCliTest(unittest.TestCase):
     def test_wechat_package_init_only_loads_official_article_chain(self):
         init_file = Path("src/gh_ui_cli/wechat/__init__.py").read_text(encoding="utf-8")
 
-        self.assertIn("from .services import articles", init_file)
-        self.assertIn("from .services import keys", init_file)
+        self.assertIn('__all__ = ["errors", "models", "paths"]', init_file)
+        self.assertNotIn("registry", init_file)
+        self.assertNotIn("dispatch", init_file)
+        self.assertNotIn("weread", init_file)
         self.assertNotIn("from .services import messages", init_file)
         self.assertNotIn("from .services import contacts", init_file)
         self.assertNotIn("from .services import images", init_file)
         self.assertNotIn("from .services import llm", init_file)
         self.assertNotIn("from .services import pdf_report", init_file)
         self.assertNotIn("from .services import stock_review", init_file)
+
+    def test_source_tree_is_only_wx_official_cache_export(self):
+        allowed_files = {
+            "src/gh_ui_cli/__init__.py",
+            "src/gh_ui_cli/__main__.py",
+            "src/gh_ui_cli/io.py",
+            "src/gh_ui_cli/wx_official_cli.py",
+            "src/gh_ui_cli/wechat/__init__.py",
+            "src/gh_ui_cli/wechat/errors.py",
+            "src/gh_ui_cli/wechat/models.py",
+            "src/gh_ui_cli/wechat/paths.py",
+            "src/gh_ui_cli/wechat/adapters/__init__.py",
+            "src/gh_ui_cli/wechat/adapters/article_store.py",
+            "src/gh_ui_cli/wechat/adapters/crypto.py",
+            "src/gh_ui_cli/wechat/adapters/decrypt.py",
+            "src/gh_ui_cli/wechat/adapters/key_scan.py",
+            "src/gh_ui_cli/wechat/adapters/local_articles.py",
+            "src/gh_ui_cli/wechat/adapters/scanner_win.py",
+            "src/gh_ui_cli/wechat/services/__init__.py",
+            "src/gh_ui_cli/wechat/services/config.py",
+            "src/gh_ui_cli/wechat/services/keys.py",
+            "src/gh_ui_cli/wechat/services/articles/__init__.py",
+            "src/gh_ui_cli/wechat/services/articles/store.py",
+            "src/gh_ui_cli/wechat/services/articles/sync.py",
+        }
+        actual_files = {
+            str(path)
+            for path in Path("src/gh_ui_cli").rglob("*.py")
+            if "__pycache__" not in path.parts
+        }
+
+        self.assertEqual(actual_files, allowed_files)
 
     def test_built_wheel_excludes_unrelated_business_packages(self):
         wheel = _latest_wheel()
@@ -188,12 +222,21 @@ class WxOfficialCliTest(unittest.TestCase):
             "gh_ui_cli/verification_plan.py",
             "gh_ui_cli/verify.py",
             "gh_ui_cli/wechat/adapters/dat_to_image.py",
+            "gh_ui_cli/wechat/adapters/_mac_helper.py",
             "gh_ui_cli/wechat/adapters/llm_client.py",
             "gh_ui_cli/wechat/adapters/messages.py",
             "gh_ui_cli/wechat/adapters/pdf_reporter.py",
+            "gh_ui_cli/wechat/adapters/scanner_mac.py",
             "gh_ui_cli/wechat/adapters/stock_filter.py",
             "gh_ui_cli/wechat/adapters/stock_kline.py",
             "gh_ui_cli/wechat/adapters/stock_selection.py",
+            "gh_ui_cli/wechat/adapters/weread_client.py",
+            "gh_ui_cli/wechat/dispatch.py",
+            "gh_ui_cli/wechat/registry.py",
+            "gh_ui_cli/wechat/services/articles/accounts.py",
+            "gh_ui_cli/wechat/services/articles/categories.py",
+            "gh_ui_cli/wechat/services/articles/login.py",
+            "gh_ui_cli/wechat/services/articles/settings.py",
             "gh_ui_cli/wechat/services/contacts.py",
             "gh_ui_cli/wechat/services/images.py",
             "gh_ui_cli/wechat/services/llm.py",
@@ -217,6 +260,7 @@ class WxOfficialCliTest(unittest.TestCase):
             self.assertNotIn(module_name, names)
         self.assertNotIn("Requires-Dist: fastapi", metadata)
         self.assertNotIn("Requires-Dist: uvicorn", metadata)
+        self.assertNotIn("Requires-Dist: httpx", metadata)
         self.assertNotIn("Requires-Dist: pandas", metadata)
         self.assertNotIn("Requires-Dist: akshare", metadata)
 

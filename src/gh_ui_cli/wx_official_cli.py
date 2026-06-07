@@ -43,7 +43,6 @@ def _add_export_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--limit", type=int, default=100, help="maximum articles to export")
     parser.add_argument("--output-dir", default="", help="directory for index and HTML files")
     parser.add_argument("--no-scan", action="store_true", help="use the existing local article store only")
-    parser.add_argument("--no-fetch-html", action="store_true", help="write title/link pages without fetching article HTML")
     parser.add_argument(
         "--no-auto-password",
         action="store_true",
@@ -65,7 +64,6 @@ def handle_export(args: argparse.Namespace) -> None:
         output_dir=args.output_dir or None,
         scan_first=not args.no_scan,
         auto_password=not args.no_auto_password,
-        fetch_html=not args.no_fetch_html,
     )
     write_json(result, save=args.save)
 
@@ -79,7 +77,6 @@ def handle_verify(args: argparse.Namespace) -> None:
         output_dir=args.output_dir or None,
         scan_first=not args.no_scan,
         auto_password=not args.no_auto_password,
-        fetch_html=not args.no_fetch_html,
     )
     write_json(report, save=args.save)
     if args.strict and not report.get("ok"):

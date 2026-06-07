@@ -6,8 +6,8 @@
 
 输出: 提取出 (mp.weixin.qq.com 链接, 标题, 公众号名, 发送时间), 入 articles.db
 
-完全本地, 不依赖任何外部 API. 用户预条件: 已经走过 wechat 密码扫描 + DB 解密流程
-(由 api/wechat.py::_ensure_decrypted 保证).
+完全本地, 不依赖任何外部 API. 用户预条件: Windows 微信已登录并已有本地消息缓存,
+由 wx-official-cli 自动完成路径检测、key 提取和 DB 解密。
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Iterable
 
 
-# 复用 messages.py 同款工具, 但内联以避免拉入 crypto/messages 的重依赖链.
+# 内联轻量 XML 提取逻辑，避免拉入任何非公众号导出模块。
 _ZSTD_MAGIC = b"\x28\xb5\x2f\xfd"
 _TAG_RE_CACHE: dict[str, re.Pattern] = {}
 _ATTR_RE_CACHE: dict[str, re.Pattern] = {}

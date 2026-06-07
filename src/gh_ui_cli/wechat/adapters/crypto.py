@@ -1,6 +1,4 @@
 """SQLCipher 4 解密 -- 纯 Python 实现。
-
-直接搬运自 gh_quant_ui/api/wechat_native/crypto.py，逻辑等价。
 SQLCipher 协议公开规范：
   PAGE_SZ = 4096
   SALT_SZ = 16  (在 page1 开头，构造 mac_salt = salt ^ 0x3A)

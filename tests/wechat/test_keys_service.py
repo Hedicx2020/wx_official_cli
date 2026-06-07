@@ -10,6 +10,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
+from gh_ui_cli.wechat.errors import KeyNotFound
 from gh_ui_cli.wechat.services import keys as keys_svc
 
 
@@ -195,6 +196,21 @@ class ResolveDbDirTest(unittest.TestCase):
                 with patch("platform.system", return_value="Darwin"):
                     resolved = keys_svc.resolve_db_dir()
         self.assertTrue(resolved.endswith("db_storage"))
+
+
+class EnsureDecryptedTest(unittest.TestCase):
+    def test_missing_key_hint_uses_wx_official_cli(self):
+        with TemporaryDirectory() as tmp:
+            db_dir = Path(tmp) / "db_storage"
+            db_dir.mkdir()
+            with patch.dict("os.environ", {"GH_WX_DATA_DIR": tmp, "HOME": tmp}, clear=False):
+                with patch("gh_ui_cli.wechat.services.keys.resolve_db_dir", return_value=str(db_dir)):
+                    with self.assertRaises(KeyNotFound) as ctx:
+                        keys_svc.ensure_decrypted()
+
+        self.assertIn("wx-official-cli verify", ctx.exception.hint or "")
+        self.assertIn("--no-auto-password", ctx.exception.hint or "")
+        self.assertNotIn("password-auto", ctx.exception.hint or "")
 
 
 if __name__ == "__main__":
