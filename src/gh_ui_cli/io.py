@@ -77,7 +77,9 @@ def ensure_jsonable(value: Any) -> Any:
 def write_json(value: Any, save: str | None = None) -> None:
     payload = json.dumps(ensure_jsonable(value), ensure_ascii=True, indent=2)
     if save:
-        Path(save).expanduser().write_text(payload + "\n", encoding="utf-8")
+        path = Path(save).expanduser()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(payload + "\n", encoding="utf-8")
     print(payload)
 
 

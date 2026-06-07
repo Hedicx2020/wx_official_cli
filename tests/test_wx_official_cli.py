@@ -123,6 +123,18 @@ class WxOfficialCliTest(unittest.TestCase):
         self.assertNotIn("factor", out)
         self.assertNotIn("backtest", out)
 
+    def test_save_creates_parent_directories_for_agent_report_paths(self):
+        with TemporaryDirectory() as tmp:
+            target = Path(tmp) / "reports" / "manifest.json"
+            try:
+                rc, out, err = self._run(["manifest", "--save", str(target)])
+            except FileNotFoundError as exc:
+                self.fail(f"--save should create parent directories for agent report paths: {exc}")
+
+            self.assertEqual(rc, 0, msg=err)
+            self.assertTrue(target.exists())
+            self.assertEqual(json.loads(target.read_text(encoding="utf-8")), json.loads(out))
+
     def test_pyproject_points_console_script_to_simplified_entry(self):
         pyproject = Path("pyproject.toml").read_text(encoding="utf-8")
 
