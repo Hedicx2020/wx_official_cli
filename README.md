@@ -27,13 +27,31 @@ wx-official-cli --help
 ## 给 Agent 的最短流程
 
 1. 让用户在 Windows 上打开并登录 PC 微信，确认目标公众号文章已经出现在本机消息缓存里。
-2. 检查路径和 key 状态：
+2. 在仓库根目录运行一条 PowerShell 命令：
+
+```powershell
+.\scripts\verify_windows_cache.ps1 -AccountName "公众号名字"
+```
+
+脚本会先保存状态报告，再执行严格验收导出。默认输出：
+
+- `status-wechat-cache-windows.json`
+- `verify-wechat-cache-windows.json`
+- `.\wechat_articles\`
+
+如果微信缓存目录不在默认位置：
+
+```powershell
+.\scripts\verify_windows_cache.ps1 -AccountName "公众号名字" -WeChatFilesDir "D:\WeChat Files"
+```
+
+也可以手动分步执行。先检查路径和 key 状态：
 
 ```bash
 uv run wx-official-cli status
 ```
 
-3. 按公众号名字导出：
+再按公众号名字导出：
 
 ```bash
 uv run wx-official-cli export "公众号名字" --limit 100 --output-dir ./wechat_articles
@@ -45,7 +63,7 @@ uv run wx-official-cli export "公众号名字" --limit 100 --output-dir ./wecha
 uv run wx-official-cli crawl "公众号名字" --limit 100 --output-dir ./wechat_articles
 ```
 
-4. 需要机器可审计的验收报告时运行：
+需要机器可审计的验收报告时运行：
 
 ```bash
 uv run wx-official-cli verify "公众号名字" --strict --save verify-wechat-cache-windows.json

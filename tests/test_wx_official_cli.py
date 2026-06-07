@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import json
 import os
+import subprocess
 import sys
 import tarfile
 import zipfile
@@ -196,6 +197,67 @@ class WxOfficialCliTest(unittest.TestCase):
         }
 
         self.assertEqual(actual_files, allowed_files)
+
+    def test_repository_tracks_only_wx_official_cache_export_files(self):
+        tracked_files = set(
+            subprocess.check_output(["git", "ls-files"], text=True, encoding="utf-8").splitlines()
+        )
+        allowed_files = {
+            ".gitignore",
+            ".github/workflows/ci.yml",
+            "MANIFEST.in",
+            "README.md",
+            "pyproject.toml",
+            "scripts/verify_windows_cache.ps1",
+            "src/gh_ui_cli/__init__.py",
+            "src/gh_ui_cli/__main__.py",
+            "src/gh_ui_cli/io.py",
+            "src/gh_ui_cli/wx_official_cli.py",
+            "src/gh_ui_cli/wechat/__init__.py",
+            "src/gh_ui_cli/wechat/errors.py",
+            "src/gh_ui_cli/wechat/models.py",
+            "src/gh_ui_cli/wechat/paths.py",
+            "src/gh_ui_cli/wechat/adapters/__init__.py",
+            "src/gh_ui_cli/wechat/adapters/article_store.py",
+            "src/gh_ui_cli/wechat/adapters/crypto.py",
+            "src/gh_ui_cli/wechat/adapters/decrypt.py",
+            "src/gh_ui_cli/wechat/adapters/key_scan.py",
+            "src/gh_ui_cli/wechat/adapters/local_articles.py",
+            "src/gh_ui_cli/wechat/adapters/scanner_win.py",
+            "src/gh_ui_cli/wechat/services/__init__.py",
+            "src/gh_ui_cli/wechat/services/config.py",
+            "src/gh_ui_cli/wechat/services/keys.py",
+            "src/gh_ui_cli/wechat/services/articles/__init__.py",
+            "src/gh_ui_cli/wechat/services/articles/store.py",
+            "src/gh_ui_cli/wechat/services/articles/sync.py",
+            "tests/test_ci_workflow.py",
+            "tests/test_wx_official_cli.py",
+            "tests/wechat/__init__.py",
+            "tests/wechat/test_articles_service.py",
+            "tests/wechat/test_cli_integration.py",
+            "tests/wechat/test_config_service.py",
+            "tests/wechat/test_crypto.py",
+            "tests/wechat/test_errors.py",
+            "tests/wechat/test_key_scan.py",
+            "tests/wechat/test_keys_service.py",
+            "tests/wechat/test_models.py",
+            "tests/wechat/test_paths.py",
+            "tests/wechat/test_scanner_win.py",
+            "uv.lock",
+        }
+
+        self.assertEqual(tracked_files, allowed_files)
+
+    def test_windows_agent_verify_script_uses_wx_official_cli_only(self):
+        script = Path("scripts/verify_windows_cache.ps1").read_text(encoding="utf-8")
+
+        self.assertIn("param(", script)
+        self.assertIn("wx-official-cli status", script)
+        self.assertIn("wx-official-cli verify", script)
+        self.assertIn("verify-wechat-cache-windows.json", script)
+        self.assertNotIn("gh-ui", script)
+        self.assertNotIn("password-auto", script)
+        self.assertNotIn("articles-cache-export", script)
 
     def test_built_wheel_excludes_unrelated_business_packages(self):
         wheel = _latest_wheel()
