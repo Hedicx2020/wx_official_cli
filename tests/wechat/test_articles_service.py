@@ -200,10 +200,16 @@ class SyncTest(_Env):
         html_file = Path(self._tmp.name) / "out" / "001.html"
         html_file.parent.mkdir()
         html_file.write_text("<html>正文</html>", encoding="utf-8")
+        index_json = html_file.parent / "index.json"
+        index_json.write_text(json.dumps({"article_count": 1, "articles": [{"title": "Alpha"}]}), encoding="utf-8")
+        index_csv = html_file.parent / "index.csv"
+        index_csv.write_text("title\nAlpha\n", encoding="utf-8-sig")
         export = {
             "status": "ok",
             "article_count": 1,
             "html_files": [str(html_file)],
+            "index_json": str(index_json),
+            "index_csv": str(index_csv),
             "output_dir": str(html_file.parent),
             "password_auto": {"status": "ok"},
         }
@@ -222,10 +228,41 @@ class SyncTest(_Env):
         self.assertTrue(out["requirements"]["database_key_available"]["ok"])
         self.assertTrue(out["requirements"]["articles_exported"]["ok"])
         self.assertTrue(out["requirements"]["html_files_written"]["ok"])
+        self.assertTrue(out["requirements"]["index_files_written"]["ok"])
+        self.assertEqual(out["requirements"]["index_files_written"]["index_article_count"], 1)
         self.assertEqual(out["mode"], "wechat_cache")
         self.assertEqual(out["current_platform"], "windows")
         self.assertTrue(out["goal_evidence"]["wechat_cache_verified"])
         self.assertEqual(out["goal_evidence"]["wechat_cache_account"], "Alpha 研究")
+
+    def test_verify_cache_export_fails_when_index_json_is_missing(self):
+        html_file = Path(self._tmp.name) / "out" / "001.html"
+        html_file.parent.mkdir()
+        html_file.write_text("<html>正文</html>", encoding="utf-8")
+        export = {
+            "status": "ok",
+            "article_count": 1,
+            "html_files": [str(html_file)],
+            "index_json": str(html_file.parent / "missing-index.json"),
+            "index_csv": str(html_file.parent / "index.csv"),
+            "output_dir": str(html_file.parent),
+            "password_auto": {"status": "ok"},
+        }
+        Path(export["index_csv"]).write_text("title\nAlpha\n", encoding="utf-8-sig")
+        status = {
+            "platform": "windows",
+            "detected_path": "C:/Users/me/Documents/WeChat Files/wxid/db_storage",
+            "configured_path": "",
+            "has_password": True,
+            "key_count": 1,
+        }
+        with patch("gh_ui_cli.wechat.services.articles.sync.export_cached_by_account", return_value=export):
+            with patch("gh_ui_cli.wechat.services.keys.password_status", return_value=status):
+                out = sync_svc.verify_cache_export("Alpha 研究")
+
+        self.assertFalse(out["ok"])
+        self.assertFalse(out["requirements"]["index_files_written"]["ok"])
+        self.assertFalse(out["goal_evidence"]["wechat_cache_verified"])
 
     def test_verify_cache_export_fails_when_no_articles_exported(self):
         export = {

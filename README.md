@@ -70,6 +70,7 @@ uv run wx-official-cli verify "公众号名字" --strict --save verify-wechat-ca
 ```
 
 `verify` 会实际运行导出流程，并检查微信缓存路径、数据库 key、文章数量和 HTML 文件写出情况。`--strict` 会在任一要求不满足时返回非零退出码。
+报告还会检查 `index.json` / `index.csv` 是否写出，并确认 `index.json` 中的文章数量与导出结果一致。
 
 ## Agent Manifest
 

@@ -187,6 +187,7 @@ def verify_cache_export(
     missing_files = [str(p) for p in html_files if not p.exists()]
     article_count = int(export.get("article_count") or 0)
     password_auto_status = str((export.get("password_auto") or {}).get("status") or "")
+    index_files = _verify_index_files(export, article_count)
     requirements = {
         "wechat_path_detected": {
             "ok": bool(status.get("detected_path") or status.get("configured_path")),
@@ -212,6 +213,7 @@ def verify_cache_export(
             "html_file_count": len(html_files),
             "missing_files": missing_files,
         },
+        "index_files_written": index_files,
     }
     ok = all(bool(item.get("ok")) for item in requirements.values())
     current_platform = str(status.get("platform") or "")
@@ -256,7 +258,38 @@ def _cache_verify_next_actions(requirements: dict[str, dict[str, Any]]) -> list[
             "检查 --output-dir 写入权限，然后重试 "
             'wx-official-cli export "公众号名字" --limit 100 --output-dir .\\wechat_articles。'
         )
+    if not requirements["index_files_written"]["ok"]:
+        actions.append(
+            "检查导出目录中的 index.json / index.csv 是否可写，然后重试 "
+            'wx-official-cli verify "公众号名字" --strict --save verify-wechat-cache-windows.json。'
+        )
     return actions
+
+
+def _verify_index_files(export: dict[str, Any], article_count: int) -> dict[str, Any]:
+    index_json = str(export.get("index_json") or "")
+    index_csv = str(export.get("index_csv") or "")
+    json_exists = bool(index_json) and Path(index_json).exists()
+    csv_exists = bool(index_csv) and Path(index_csv).exists()
+    index_article_count: int | None = None
+    parse_error = ""
+    if json_exists:
+        try:
+            payload = json.loads(Path(index_json).read_text(encoding="utf-8"))
+            index_article_count = int(payload.get("article_count") or 0)
+        except Exception as exc:
+            parse_error = f"{type(exc).__name__}: {exc}"
+    count_matches = index_article_count == article_count
+    return {
+        "ok": article_count > 0 and json_exists and csv_exists and count_matches and not parse_error,
+        "index_json": index_json,
+        "index_csv": index_csv,
+        "index_json_exists": json_exists,
+        "index_csv_exists": csv_exists,
+        "index_article_count": index_article_count,
+        "index_article_count_matches": count_matches,
+        "parse_error": parse_error,
+    }
 
 
 def _resolve_account(store, name: str):
