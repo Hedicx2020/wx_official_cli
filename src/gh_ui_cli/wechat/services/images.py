@@ -12,11 +12,11 @@ from ..registry import capability
 from . import keys as keys_svc
 
 
-def _dat_root() -> Path:
+def _dat_root() -> Path | None:
     """微信 v4 把图片放在 db_storage 同级的 msg/ 或 image/ 下；按本机 layout 找。"""
     db_dir = keys_svc.resolve_db_dir()
     if not db_dir:
-        return Path()
+        return None
     p = Path(db_dir).parent
     # 4.x layout: ../msg/attach/<biz>/...
     return p
@@ -24,7 +24,7 @@ def _dat_root() -> Path:
 
 def list_images(month: str | None = None, limit: int = 100) -> dict[str, Any]:
     root = _dat_root()
-    if not root or not root.exists():
+    if root is None or not root.exists():
         return {"items": [], "total": 0}
     out: list[dict] = []
     for path in root.rglob("*.dat"):
@@ -42,7 +42,7 @@ def list_images(month: str | None = None, limit: int = 100) -> dict[str, Any]:
 
 def list_months() -> dict[str, Any]:
     root = _dat_root()
-    if not root or not root.exists():
+    if root is None or not root.exists():
         return {"months": []}
     months: set[str] = set()
     for path in root.rglob("*.dat"):

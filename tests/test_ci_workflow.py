@@ -13,6 +13,7 @@ class CiWorkflowTest(unittest.TestCase):
         self.assertIn("macos-latest", workflow)
         self.assertIn("python-version: [\"3.10\", \"3.12\"]", workflow)
         self.assertIn("python-version: ${{ matrix.python-version }}", workflow)
+        self.assertIn("uv run --extra full python -m unittest discover -s tests", workflow)
         self.assertIn("API-base manifest/invoke/smoke/verify integration", workflow)
         self.assertIn("tests.test_cli_http_integration", workflow)
         self.assertIn("Package build", workflow)

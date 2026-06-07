@@ -63,7 +63,7 @@ class WechatPathsTest(unittest.TestCase):
             (home / ".gh_quant_ui" / "config.json").write_text(
                 json.dumps({"db_path": str(target)}), encoding="utf-8"
             )
-            env = {"DB_PATH": "", "HOME": str(home)}
+            env = {"DB_PATH": "", "HOME": str(home), "USERPROFILE": str(home)}
             with patch.dict("os.environ", env, clear=False):
                 p = paths.local_data_dir()
                 self.assertEqual(p, target)
