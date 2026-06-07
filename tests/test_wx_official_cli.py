@@ -151,6 +151,18 @@ class WxOfficialCliTest(unittest.TestCase):
         self.assertIn("from .wx_official_cli import main", main_file)
         self.assertNotIn("from .cli import main", main_file)
 
+    def test_wechat_package_init_only_loads_official_article_chain(self):
+        init_file = Path("src/gh_ui_cli/wechat/__init__.py").read_text(encoding="utf-8")
+
+        self.assertIn("from .services import articles", init_file)
+        self.assertIn("from .services import keys", init_file)
+        self.assertNotIn("from .services import messages", init_file)
+        self.assertNotIn("from .services import contacts", init_file)
+        self.assertNotIn("from .services import images", init_file)
+        self.assertNotIn("from .services import llm", init_file)
+        self.assertNotIn("from .services import pdf_report", init_file)
+        self.assertNotIn("from .services import stock_review", init_file)
+
     def test_built_wheel_excludes_unrelated_business_packages(self):
         wheel = _latest_wheel()
         sdist = _latest_sdist()
@@ -161,6 +173,33 @@ class WxOfficialCliTest(unittest.TestCase):
             "gh_ui_cli/ai/",
             "gh_ui_cli/remote/",
             "gh_ui_cli/system/",
+        )
+        unrelated_modules = (
+            "gh_ui_cli/api_client.py",
+            "gh_ui_cli/cli.py",
+            "gh_ui_cli/coverage_audit.py",
+            "gh_ui_cli/dependencies.py",
+            "gh_ui_cli/invoke.py",
+            "gh_ui_cli/manifest.py",
+            "gh_ui_cli/profile.py",
+            "gh_ui_cli/runtime_verify.py",
+            "gh_ui_cli/smoke.py",
+            "gh_ui_cli/source.py",
+            "gh_ui_cli/verification_plan.py",
+            "gh_ui_cli/verify.py",
+            "gh_ui_cli/wechat/adapters/dat_to_image.py",
+            "gh_ui_cli/wechat/adapters/llm_client.py",
+            "gh_ui_cli/wechat/adapters/messages.py",
+            "gh_ui_cli/wechat/adapters/pdf_reporter.py",
+            "gh_ui_cli/wechat/adapters/stock_filter.py",
+            "gh_ui_cli/wechat/adapters/stock_kline.py",
+            "gh_ui_cli/wechat/adapters/stock_selection.py",
+            "gh_ui_cli/wechat/services/contacts.py",
+            "gh_ui_cli/wechat/services/images.py",
+            "gh_ui_cli/wechat/services/llm.py",
+            "gh_ui_cli/wechat/services/messages.py",
+            "gh_ui_cli/wechat/services/pdf_report.py",
+            "gh_ui_cli/wechat/services/stock_review.py",
         )
 
         with zipfile.ZipFile(wheel) as archive:
@@ -174,6 +213,8 @@ class WxOfficialCliTest(unittest.TestCase):
             any(name.startswith(unrelated_prefixes) for name in names),
             "wheel should not package data/factor/backtest/ai/remote/system modules",
         )
+        for module_name in unrelated_modules:
+            self.assertNotIn(module_name, names)
         self.assertNotIn("Requires-Dist: fastapi", metadata)
         self.assertNotIn("Requires-Dist: uvicorn", metadata)
         self.assertNotIn("Requires-Dist: pandas", metadata)
@@ -185,6 +226,8 @@ class WxOfficialCliTest(unittest.TestCase):
             any(f"/src/{prefix}" in name for name in sdist_names for prefix in unrelated_prefixes),
             "sdist should not package data/factor/backtest/ai/remote/system modules",
         )
+        for module_name in unrelated_modules:
+            self.assertFalse(any(name.endswith(f"/src/{module_name}") for name in sdist_names), module_name)
 
 
 def _latest_wheel() -> Path:
